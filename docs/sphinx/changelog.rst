@@ -1,2 +1,5 @@
+.. _changelog:
 
-.. include:: CHANGELOG.rst
+==========
+Change Log
+==========

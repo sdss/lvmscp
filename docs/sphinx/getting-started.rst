@@ -1,59 +1,38 @@
 
 .. _getting-started:
 
-Getting started with SCP
+Getting started
 ============================
+
 
 Introduction
 -------------
 
-In this section we provide a qiuck introduction to SCP. We assume that you are comfortable with aynchronous programming and 'asyncio'. SCP (Spectrograph Control Package) is a software that controls the spectrograph in SDSS-V LVMi project. SCP is composed of code based on sdss software framework. Among them, ‘sdss-clu’ is applied to create an actor that controls each hardware and executes communication.
+SCP stands for 'Spectrograph Control Package' and lvmscp is the actor that controls the lower level actors which are controlling devices inside the spectrograph. lvmscp is based on the sdss software framework CLU. Among them, ‘sdss-clu’ is applied to create an actor that controls each hardware and executes communication.
 
-In 'CLU', We''' define what an *actor* is: and actor is a piece of software that performs a well defined task (control a CCD camera, interface with a database) and is a *server* that receives *commands* and replies with a series of *keywords*. If you are not familiar with those concepts, the `CLU's documentation <https://clu.readthedocs.io/en/latest/index.html>`_ is a good reference place.
-
-We will expand on these concepts in following sections.
+In 'CLU', We define what an *actor* is: and actor is a piece of software that performs a well defined task (control a CCD camera, interface with a database) and is a *server* that receives *commands* and replies with a series of *keywords*. If you are not familiar with those concepts, the `CLU's documentation <https://clu.readthedocs.io/en/latest/index.html>`_ is a good reference place.
 
 
+Installation
+-------------
 
-Hardware Component
+.. include:: ../../README.rst
+  :start-line: 2
+
+Hardware Components
 --------------------------
-    
-Here is the Hardware and Software Component Architecture diagram in spectrograph.
 
-.. image:: _static/HW__conf_20210506_LCO.png
+Here is the Hardware and Software Component diagram in spectrograph.
+
+.. image:: _static/HW__conf_20210824_LCO.png
     :align: center
 
 
+Architecture
+--------------------------
 
-.. _running-SCP:
+Here is the Architecture and component diagram explaining the hierarchy of lvmscp.
+lvmscp is using the AMQP Actor class from clu which is based on RabbitMQ protocol, and each actor becomes a producer/consumer to activate commands.
 
-Running an SCP
-----------------
-
-SCP can be started by simply 'SCP start' command ::
-
-    SCP start
-
-This will start SCP but will not start the porting. For that you need to use ''clu'' command. ::
-
-    clu
-
-which will be responsible for implementing the protocol. Clu creates an actor and the actor processes pre-defined tasks.
-SCP is composed of OSU actor, NPS actor, and Archon actor. Each actor controls and manages hardware connected with Controller.
-
-You can learn more about the archon `here <https://sdss-archon.readthedocs.io/en/latest/>`_.
-
-Actor
---------
-
-Archon Actor
-
-OSU Actor
-
-NPS Actor
-
-
-
-Configuration files
-------------------------
-
+.. image:: _static/compo_diagram_20210824.png
+    :align: center

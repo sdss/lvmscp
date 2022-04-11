@@ -1,25 +1,24 @@
 
 .. _api:
 
-API Reference
+API
 ==================
 
+.. _api-lvmscp:
 
 Actor
 -------
 
-.. automodule:: scpactor.actor.actor
+.. automodule:: lvmscp.actor.actor
    :members:
    :undoc-members:
    :show-inheritance:
 
-commands
------------
 
-The ``scp`` actor replies to the following commands.  
+Exposure functions
+-------------------
 
-.. automodule:: scpactor.actor.commands.engineering
+.. automodule:: lvmscp.actor.commands.exposure
    :members:
    :undoc-members:
    :show-inheritance:
-
