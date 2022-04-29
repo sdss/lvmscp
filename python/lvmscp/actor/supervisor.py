@@ -29,7 +29,7 @@ class Supervisor:
         self.exposure_lock = asyncio.Lock()
         # Now only sp1 spectrograph is available 20211224
         if spectro == "sp1":
-            self.ready = True
+            self.ready = False
             self.name = spectro
             self.shutter_status = "ERROR"
             self.shutter_power_status = "ERROR"
@@ -84,57 +84,59 @@ class Supervisor:
             self.labhum = "ERROR"
         # sp2 and sp3 spectrograph is unavailable now. 20210117
         elif spectro == "sp2":
-            self.ready = False
+            self.ready = True
             self.name = spectro
-            self.shutter_status = "Not Connected"
-            self.shutter_power_status = "Not Connected"
-            self.hartmann_left_status = "Not Connected"
-            self.hartmann_right_status = "Not Connected"
-            self.hartmann_left_power_status = "Not Connected"
-            self.hartmann_right_power_status = "Not Connected"
-            self.rhtRH1 = "Not Connected"
-            self.rhtT1 = "Not Connected"
-            self.rhtRH2 = "Not Connected"
-            self.rhtT2 = "Not Connected"
-            self.rhtRH3 = "Not Connected"
-            self.rhtT3 = "Not Connected"
-            self.rtd1 = "Not Connected"
-            self.rtd2 = "Not Connected"
-            self.rtd3 = "Not Connected"
-            self.rtd4 = "Not Connected"
-            self.r1_pressure = "Not Connected"
-            self.b1_pressure = "Not Connected"
-            self.z1_pressure = "Not Connected"
-            self.r1_temperature = "Not Connected"
-            self.b1_temperature = "Not Connected"
-            self.z1_temperature = "Not Connected"
-            self.gage_A = "Not Connected"
-            self.gage_B = "Not Connected"
-            self.gage_C = "Not Connected"
-            self.testccd = "Not connected"
-            self.ln2nir = "Not connected"
-            self.ln2red = "Not connected"
-            self.archon_power_nps = "Not connected"
-            self.argon = "Not connected"
-            self.xenon = "Not connected"
-            self.hgar = "Not connected"
-            self.ldls = "Not connected"
-            self.krypton = "Not connected"
-            self.neon = "Not connected"
-            self.hgne = "Not connected"
-            self.nirled = "Not connected"
-            self.ieb06 = "Not connected"
-            self.rpi = "Not connected"
-            self.pres_transducer = "Not connected"
-            self.archon_status = "Not connected"
-            self.r1ccd_temp = "Not connected"
-            self.b1ccd_temp = "Not connected"
-            self.z1ccd_temp = "Not connected"
-            self.r1heater = "Not connected"
-            self.b1heater = "Not connected"
-            self.z1heater = "Not connected"
-            self.readoutmode = "Not connected"
+            self.shutter_status = "ERROR"
+            self.shutter_power_status = "ERROR"
+            self.hartmann_left_status = "ERROR"
+            self.hartmann_right_status = "ERROR"
+            self.hartmann_left_power_status = "ERROR"
+            self.hartmann_right_power_status = "ERROR"
+            self.rhtRH1 = "ERROR"
+            self.rhtT1 = "ERROR"
+            self.rhtRH2 = "ERROR"
+            self.rhtT2 = "ERROR"
+            self.rhtRH3 = "ERROR"
+            self.rhtT3 = "ERROR"
+            self.rtd1 = "ERROR"
+            self.rtd2 = "ERROR"
+            self.rtd3 = "ERROR"
+            self.rtd4 = "ERROR"
+            self.r1_pressure = "ERROR"
+            self.b1_pressure = "ERROR"
+            self.z1_pressure = "ERROR"
+            self.r1_temperature = "ERROR"
+            self.b1_temperature = "ERROR"
+            self.z1_temperature = "ERROR"
+            self.gage_A = -1.0
+            self.gage_B = -1.0
+            self.gage_C = -1.0
+            self.testccd = "z1"
+            self.ln2nir = "ERROR"
+            self.ln2red = "ERROR"
+            self.archon_power_nps = "ERROR"
+            self.argon = "ERROR"
+            self.xenon = "ERROR"
+            self.hgar = "ERROR"
+            self.ldls = "ERROR"
+            self.krypton = "ERROR"
+            self.neon = "ERROR"
+            self.hgne = "ERROR"
+            self.nirled = "ERROR"
+            self.ieb06 = "ERROR"
+            self.rpi = "ERROR"
+            self.pres_transducer = "ERROR"
+            self.archon_status = "ERROR"
+            self.r1ccd_temp = "ERROR"
+            self.b1ccd_temp = "ERROR"
+            self.z1ccd_temp = "ERROR"
+            self.r1heater = "ERROR"
+            self.b1heater = "ERROR"
+            self.z1heater = "ERROR"
+            self.readoutmode = "800"  # default readout mode is 800 MHz
             self.status_dict = {}
+            self.labtemp = -999
+            self.labhum = -1
         elif spectro == "sp3":
             self.ready = False
             self.name = spectro
@@ -321,37 +323,37 @@ class Supervisor:
 
             if gage_status_cmd.status.did_fail:
                 command.info(
-                    text="Failed to receive the telemetry status from transducer"
+                    text="Failed to receive the depth from the linear depth gage"
                 )
             else:
                 replies = gage_status_cmd.replies
 
-            # repeat the status command if the A value is wrong.
-            # A value is not updated frequently due to hardware connection
-            # 20220331 there was an error that the replies[-2].body[self.name]["z1"] reports False,
-            # so I added some if condition for the unfrequent update of the hardware connection
+                # repeat the status command if the A value is wrong.
+                # A value is not updated frequently due to hardware connection
+                # 220331 there was an error that replies[-2].body[self.name]["z1"] reports False,
+                # so I added some if condition for the unfrequent update of the hardware connection
 
-            print(replies[-2].body[self.name]["z1"])
-            if replies[-2].body[self.name]["z1"] is not False:
-                if replies[-2].body[self.name]["z1"]["A"] == -999.0:
-                    gage_status_cmd = await asyncio.wait_for(
-                        command.actor.send_command(
-                            "lvmieb", f"depth status {self.name} z1"
-                        ),
-                        1,
-                    )
-                    await gage_status_cmd
-
-                    if gage_status_cmd.status.did_fail:
-                        command.info(
-                            text="Failed to receive the telemetry status from transducer"
+                print(replies[-2].body[self.name]["z1"])
+                if replies[-2].body[self.name]["z1"] is not False:
+                    if replies[-2].body[self.name]["z1"]["A"] == -999.0:
+                        gage_status_cmd = await asyncio.wait_for(
+                            command.actor.send_command(
+                                "lvmieb", f"depth status {self.name} z1"
+                            ),
+                            1,
                         )
-                    else:
-                        replies = gage_status_cmd.replies
+                        await gage_status_cmd
 
-                self.gage_A = replies[-2].body[self.name]["z1"]["A"]
-                self.gage_B = replies[-2].body[self.name]["z1"]["B"]
-                self.gage_C = replies[-2].body[self.name]["z1"]["C"]
+                        if gage_status_cmd.status.did_fail:
+                            command.info(
+                                text="Failed to receive the depth from the linear depth gage"
+                            )
+                        else:
+                            replies = gage_status_cmd.replies
+
+                    self.gage_A = replies[-2].body[self.name]["z1"]["A"]
+                    self.gage_B = replies[-2].body[self.name]["z1"]["B"]
+                    self.gage_C = replies[-2].body[self.name]["z1"]["C"]
 
             # check the status of the lab temperature & lab humidity
             self.labtemp, self.labhum = await self.read_govee(command)
@@ -911,11 +913,9 @@ class Supervisor:
                 self.z1_pressure,
                 "Pressure from the transducer of z1 cryostat",
             ),
-            self.testccd: {
-                "DEPTHA": self.gage_A,
-                "DEPTHB": self.gage_B,
-                "DEPTHC": self.gage_C,
-            },
+            "DEPTHA": self.gage_A,
+            "DEPTHB": self.gage_B,
+            "DEPTHC": self.gage_C,
             "LABTEMP": (self.labtemp, "Govee H5179 lab temperature [C]"),
             "IMAGETYP": (flavour, "Image type"),
         }

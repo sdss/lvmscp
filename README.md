@@ -5,7 +5,7 @@
 [![Documentation Status](https://readthedocs.org/projects/lvmscp/badge/?version=latest)](https://lvmscp.readthedocs.io/en/latest/?badge=latest)
 [![Test](https://github.com/sdss/lvmscp/actions/workflows/test.yml/badge.svg)](https://github.com/sdss/lvmscp/actions/workflows/test.yml)
 [![Docker](https://github.com/sdss/lvmscp/actions/workflows/Docker.yml/badge.svg)](https://github.com/sdss/lvmscp/actions/workflows/Docker.yml)
-[![codecov](https://codecov.io/gh/sdss/lvmscp/branch/main/graph/badge.svg?token=RYKAKyfNpZ)](https://codecov.io/gh/sdss/lvmscp)
+[![codecov](https://codecov.io/gh/sdss/lvmscp/branch/master/graph/badge.svg?token=RYKAKyfNpZ)](https://codecov.io/gh/sdss/lvmscp)
 
 SDSS-V LVM(Local Volume Mapper) control software for the whole Spectrograpgh system
 
