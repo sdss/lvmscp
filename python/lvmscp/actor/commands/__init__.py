@@ -10,7 +10,7 @@ import glob
 import importlib
 import os
 
-from clu.parsers.click import command_parser as parser
+from archon.actor.commands import parser
 
 
 # Autoimport all modules in this directory so that they are added to the parser.
