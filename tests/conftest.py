@@ -12,11 +12,11 @@ more information.
 
 import os
 
-import clu.testing
 import pytest as pytest
+
+import clu.testing
 from clu import LegacyActor
 from clu.actor import AMQPBaseActor
-
 from sdsstools import merge_config, read_yaml_file
 
 from lvmscp import config
