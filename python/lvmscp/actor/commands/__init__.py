@@ -25,6 +25,8 @@ files = [
 ]
 
 for file_ in files:
+    if file_.startswith("deprecated"):
+        continue
     modname = file_[0:-3].replace("/", ".")
     mod = importlib.import_module(
         "lvmscp.actor.commands." + modname
