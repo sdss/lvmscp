@@ -55,6 +55,8 @@ class SCPActor(ArchonActor):
 
         assert self.model
 
+        self.read_credentials()
+
         # Add lamps
         self.dli = DLI()
         self.lamps: dict[str, dict] = {}
@@ -91,6 +93,16 @@ class SCPActor(ArchonActor):
                 schema["additionalProperties"] = scp_schema["additionalProperties"]
 
         return schema
+
+    def read_credentials(self):
+        """Reads the credentials file."""
+
+        credentials_file = self.config.get("credentials_file", None)
+        if credentials_file is None:
+            self.config["credentials"] = {}
+        else:
+            credentials_file = os.path.expanduser(credentials_file)
+            self.config["credentials"] = read_yaml_file(credentials_file)["credentials"]
 
     @classmethod
     def from_config(cls, config, *args, **kwargs):

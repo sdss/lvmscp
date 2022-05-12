@@ -99,6 +99,8 @@ files:
   split: true
   template: 'sdR-{hemisphere}-{ccd}-{exposure_no:08d}.fits.gz'
 
+credentials_file: ~/.config/sdss/lvmscp_credentials.yml
+
 exposure_list:
   id: 103BNxjlZ59Sob3jDO4EN1z6zp2q5YrYA6nTjGlZM6XY
   sheet: Sheet2
