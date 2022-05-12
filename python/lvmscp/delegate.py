@@ -11,16 +11,17 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING, List, Literal, Tuple
 
+from astropy.io import fits
+
 from archon.actor import ExposureDelegate
 from archon.controller.controller import ArchonController
-from astropy.io import fits
 
 
 if TYPE_CHECKING:
-    from .actor import SCPActor
+    from .actor import SCPActor  # noqa
 
 
-class LVMExposeDelegate(ExposureDelegate[SCPActor]):
+class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
     """Expose delegate for LVM."""
 
     def __init__(self, actor):
@@ -96,13 +97,6 @@ class LVMExposeDelegate(ExposureDelegate[SCPActor]):
     async def readout_cotasks(self):
         """Grab sensor data during CCD readout to save time."""
 
-        command = self.command
-
-        # lvmscp will add these header keywords, so add them here only if
-        # this is archon's own lvm expose command.
-        if not command.raw_command_string.startswith("lvm expose"):
-            return
-
         assert self.expose_data
         controllers = self.expose_data.controllers
 
@@ -114,16 +108,14 @@ class LVMExposeDelegate(ExposureDelegate[SCPActor]):
 
         # Lamp status.
         self.extra_data["lamps"] = {}
-        for lamp_name, lamp_config in self.actor.lamps.items():
+        for lamp, lamp_config in self.actor.lamps.items():
             try:
                 value = await self.actor.dli.get_outlet_state(**lamp_config)
                 value = "ON" if value is True else "OFF"
             except Exception as err:
-                command.warning(
-                    text=f"Failed retrieving status of lamp {lamp_name}: {err}"
-                )
+                self.command.warning(f"Failed retrieving status of lamp {lamp}: {err}")
                 value = "?"
-            self.extra_data["lamps"][lamp_name] = value
+            self.extra_data["lamps"][lamp] = value
 
         # Pressure from SENS4
         self.extra_data["pressure"] = {}
@@ -156,8 +148,8 @@ class LVMExposeDelegate(ExposureDelegate[SCPActor]):
             else:
                 hartmann[key]["status"] = "0" if hartmann[key]["open"] else "1"
 
-        left = hartmann["hartmann_left"]["status"]
-        right = hartmann["hartmann_right"]["status"]
+        left = hartmann[f"{controller.name}_hartmann_left"]["status"]
+        right = hartmann[f"{controller.name}_hartmann_right"]["status"]
 
         for hdu in hdus:
             hdu.header["HARTMANN"] = (f"{left} {right}", "Left/right. 0=open 1=closed")
