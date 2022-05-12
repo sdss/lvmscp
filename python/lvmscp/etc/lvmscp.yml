@@ -46,6 +46,47 @@ controllers:
         readnoise: [3.6, 3.6, 3.4, 3.6]
         type: STA4850
 
+timeouts:
+  controller_connect: 5
+  write_config_timeout: 2
+  write_config_delay: 0.0001
+  expose_timeout: 2
+  readout_expected: 40
+  readout_max: 60
+  fetching_expected: 5
+  fetching_max: 10
+  flushing: 1.2
+
+devices:
+  lamps:
+    MI150:
+      host: 10.7.45.22
+      outlet: 4
+    TS:
+      host: 10.7.45.29
+      outlet: 7
+    Argon:
+      host: 10.7.45.31
+      outlet: 1
+    Xenon:
+      host: 10.7.45.31
+      outlet: 2
+    HgAr:
+      host: 10.7.45.31
+      outlet: 3
+    LDLS:
+      host: 10.7.45.31
+      outlet: 4
+    Krypton:
+      host: 10.7.45.31
+      outlet: 5
+    Neon:
+      host: 10.7.45.31
+      outlet: 6
+    HgNe:
+      host: 10.7.45.31
+      outlet: 7
+
 # Header for each CCD. The key is the header keyword name. The value can
 # be a single string, a tuple with the value and comment, or a dictionary for
 # cases in which the value is retrieved from an archon command or when the
