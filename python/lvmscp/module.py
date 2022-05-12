@@ -5,7 +5,12 @@ from clu.actor import AMQPClient
 from cluplus.proxy import Proxy
 
 
+# TODO: I really don't like this here, but keeping for now. If we keep this type
+# of programmatic API it should in some separate repo lvmapi or something like it.
+
+
 class API:
+    @staticmethod
     def ping():
 
         try:
@@ -15,18 +20,21 @@ class API:
             lvmscp.start()
 
         except Exception as e:
-            amqpc.log.error(f"Exception: {e}")
+            print(f"Exception: {e}")
+            return
 
         # sequential
         try:
             result = lvmscp.ping()
 
         except Exception as e:
-            amqpc.log.error(f"Exception: {e}")
+            print(f"Exception: {e}")
+            return
 
         print(result)
         return result
 
+    @staticmethod
     def status():
 
         try:
@@ -36,18 +44,21 @@ class API:
             lvmscp.start()
 
         except Exception as e:
-            amqpc.log.error(f"Exception: {e}")
+            print(f"Exception: {e}")
+            return
 
         # sequential
         try:
             result = lvmscp.status()
 
         except Exception as e:
-            amqpc.log.error(f"Exception: {e}")
+            print(f"Exception: {e}")
+            return
 
         print(result)
         return result
 
+    @staticmethod
     def expose(
         exptime=0.0,
         Nexp=1,
@@ -66,7 +77,8 @@ class API:
             lvmscp.start()
 
         except Exception as e:
-            amqpc.log.error(f"Exception: {e}")
+            print(f"Exception: {e}")
+            return
 
         # sequential
         try:
@@ -77,11 +89,13 @@ class API:
             )
 
         except Exception as e:
-            amqpc.log.error(f"Exception: {e}")
+            print(f"Exception: {e}")
+            return
 
         print(result)
         return result
 
+    @staticmethod
     def hartmann_set(str):
         try:
             amqpc = AMQPClient(name=f"{sys.argv[0]}.proxy-{uuid.uuid4().hex[:8]}")
@@ -90,10 +104,12 @@ class API:
             lvmscp.start()
 
         except Exception as e:
-            amqpc.log.error(f"Exception: {e}")
+            print(f"Exception: {e}")
+            return
 
         possible_list = ["left", "right", "both", "close"]
 
+        result = None
         if str in possible_list:
             # sequential
             try:
@@ -102,11 +118,14 @@ class API:
                 result = lvmscp.hartmann("set", str)
 
             except Exception as e:
-                amqpc.log.error(f"Exception: {e}")
+                print(f"Exception: {e}")
+                return
 
         print(result)
+
         return result
 
+    @staticmethod
     def gage_set(ccd: str):
         try:
             amqpc = AMQPClient(name=f"{sys.argv[0]}.proxy-{uuid.uuid4().hex[:8]}")
@@ -115,10 +134,12 @@ class API:
             lvmscp.start()
 
         except Exception as e:
-            amqpc.log.error(f"Exception: {e}")
+            print(f"Exception: {e}")
+            return
 
         possible_list = ["r1", "b1", "z1"]
 
+        result = None
         if ccd in possible_list:
             try:
                 # 2 is the binning
@@ -126,10 +147,12 @@ class API:
                 result = lvmscp.gage("setccd", ccd)
 
             except Exception as e:
-                amqpc.log.error(f"Exception: {e}")
+                print(f"Exception: {e}")
+                return
 
         return result
 
+    @staticmethod
     def readout_set(readout: str):
         try:
             amqpc = AMQPClient(name=f"{sys.argv[0]}.proxy-{uuid.uuid4().hex[:8]}")
@@ -138,10 +161,12 @@ class API:
             lvmscp.start()
 
         except Exception as e:
-            amqpc.log.error(f"Exception: {e}")
+            print(f"Exception: {e}")
+            return
 
         possible_list = ["400", "800", "HDR"]
 
+        result = None
         if readout in possible_list:
             try:
                 # 2 is the binning
@@ -149,10 +174,12 @@ class API:
                 result = lvmscp.readout(readout)
 
             except Exception as e:
-                amqpc.log.error(f"Exception: {e}")
+                print(f"Exception: {e}")
+                return
 
         return result
 
+    @staticmethod
     def lvmnps_ping():
         try:
             amqpc = AMQPClient(name=f"{sys.argv[0]}.proxy-{uuid.uuid4().hex[:8]}")
@@ -161,7 +188,8 @@ class API:
             lvmnps.start()
 
         except Exception as e:
-            amqpc.log.error(f"Exception: {e}")
+            print(f"Exception: {e}")
+            return
 
         # sequential
         result = lvmnps.ping()
@@ -169,11 +197,13 @@ class API:
             result = lvmnps.ping()
 
         except Exception as e:
-            amqpc.log.error(f"Exception: {e}")
+            print(f"Exception: {e}")
+            return
 
         print(result)
         return result
 
+    @staticmethod
     def lvmieb_ping():
         try:
             amqpc = AMQPClient(name=f"{sys.argv[0]}.proxy-{uuid.uuid4().hex[:8]}")
@@ -182,7 +212,8 @@ class API:
             lvmieb.start()
 
         except Exception as e:
-            amqpc.log.error(f"Exception: {e}")
+            print(f"Exception: {e}")
+            return
 
         # sequential
         result = lvmieb.ping()
@@ -190,11 +221,13 @@ class API:
             result = lvmieb.ping()
 
         except Exception as e:
-            amqpc.log.error(f"Exception: {e}")
+            print(f"Exception: {e}")
+            return
 
         print(result)
         return result
 
+    @staticmethod
     def lamp_on(switch="DLI-03", portnum=None):
         try:
             amqpc = AMQPClient(name=f"{sys.argv[0]}.proxy-{uuid.uuid4().hex[:8]}")
@@ -203,19 +236,22 @@ class API:
             lvmnps.start()
 
         except Exception as e:
-            amqpc.log.error(f"Exception: {e}")
+            print(f"Exception: {e}")
+            return
 
         # sequential
         try:
             result = lvmnps.on(switch, portnum)
 
         except Exception as e:
-            amqpc.log.error(f"Exception: {e}")
+            print(f"Exception: {e}")
+            return
 
         print(result)
 
         return result
 
+    @staticmethod
     def lamp_off(switch="DLI-03", portnum=None):
         try:
             amqpc = AMQPClient(name=f"{sys.argv[0]}.proxy-{uuid.uuid4().hex[:8]}")
@@ -224,14 +260,16 @@ class API:
             lvmnps.start()
 
         except Exception as e:
-            amqpc.log.error(f"Exception: {e}")
+            print(f"Exception: {e}")
+            return
 
         # sequential
         try:
             result = lvmnps.off(switch, portnum)
 
         except Exception as e:
-            amqpc.log.error(f"Exception: {e}")
+            print(f"Exception: {e}")
+            return
 
         print(result)
 
