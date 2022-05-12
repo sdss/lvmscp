@@ -46,13 +46,9 @@ class SCPActor(ArchonActor):
 
     def __init__(self, *args, **kwargs):
 
-        if "schema" not in kwargs:
-            kwargs["schema"] = os.path.join(
-                os.path.dirname(__file__),
-                "../etc/schema.json",
-            )
+        schema = self.merge_schemas(kwargs.pop("schema", None))
 
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, schema=schema, **kwargs)
 
         self._log_lock = asyncio.Lock()
         self._log_values = {}
@@ -74,6 +70,27 @@ class SCPActor(ArchonActor):
         # Model callbacks
         self._log_lock = asyncio.Lock()
         self.model["filename"].register_callback(self.fill_log)
+
+    def merge_schemas(self, scp_schema_path: str | None = None):
+        """Merge default schema with SCP one."""
+
+        schema = get_schema()  # Default archon schema.
+
+        if scp_schema_path:
+            root_path = pathlib.Path(__file__).absolute().parents[1]
+            if not os.path.isabs(scp_schema_path):
+                scp_schema_path = os.path.join(str(root_path), scp_schema_path)
+
+            scp_schema = json.loads(open(scp_schema_path, "r").read())
+
+            schema["definitions"].update(scp_schema.get("definitions", {}))
+            schema["properties"].update(scp_schema.get("properties", {}))
+            schema["patternProperties"].update(scp_schema.get("patternProperties", {}))
+
+            if "additionalProperties" in scp_schema:
+                schema["additionalProperties"] = scp_schema["additionalProperties"]
+
+        return schema
 
     @classmethod
     def from_config(cls, config, *args, **kwargs):
