@@ -111,3 +111,4 @@ actor:
   host: localhost
   port: 5672
   log_dir: '/data/logs/lvmscp'
+  schema: etc/schema.json
