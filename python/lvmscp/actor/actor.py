@@ -272,8 +272,6 @@ class SCPActor(ArchonActor):
             notes,
         )
 
-        self._log_values = {}
-
         async with self._log_lock:
             spreadsheet_id = self.config["exposure_list"]["id"]
             sheet = self.config["exposure_list"]["sheet"]
