@@ -1218,23 +1218,18 @@ docutils = ">=0.7"
 
 [[package]]
 name = "sdss-archon"
-version = "0.6.0-alpha.0"
+version = "0.6.0"
 description = "A library and actor to communicate with an STA Archon controller."
 category = "main"
 optional = false
-python-versions = "^3.8"
-develop = true
+python-versions = ">=3.8,<4.0"
 
 [package.dependencies]
-astropy = "^5.0"
-click-default-group = "^1.2.2"
-numpy = "^1.19.5"
-sdss-clu = "^1.3.0"
+astropy = ">=5.0,<6.0"
+click-default-group = ">=1.2.2,<2.0.0"
+numpy = ">=1.19.5,<2.0.0"
+sdss-clu = ">=1.3.0,<2.0.0"
 sdsstools = ">=0.4.13"
-
-[package.source]
-type = "directory"
-url = "../archon"
 
 [[package]]
 name = "sdss-clu"
@@ -1648,7 +1643,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "b2ce0d094991102fd2dbd34c1a42545b2dd1af76e282f6073836672d80b2cee8"
+content-hash = "667e09535288ee074f231dd888cfdd0f6c6977857e11329153e09cfc61ce3b98"
 
 [metadata.files]
 aio-pika = [
@@ -2516,7 +2511,10 @@ rstcheck = [
     {file = "rstcheck-3.5.0-py3-none-any.whl", hash = "sha256:30c36768c4bd617a85ab93c31facaf410582e53803fde624845eb00c1430070c"},
     {file = "rstcheck-3.5.0.tar.gz", hash = "sha256:d4b035300b7d898403544f38c3a4980171ce85f487d25e188347bbafb6ee58c0"},
 ]
-sdss-archon = []
+sdss-archon = [
+    {file = "sdss-archon-0.6.0.tar.gz", hash = "sha256:dfd3a375bf8173a378df7b2175ae55b55c9a20102586873cf4b34ddea71cdf60"},
+    {file = "sdss_archon-0.6.0-py3-none-any.whl", hash = "sha256:e147e81378452c78ad235187a25a12aa70b66dfb0c07a818085ce7535ebdf14f"},
+]
 sdss-clu = [
     {file = "sdss-clu-1.6.1.tar.gz", hash = "sha256:fbf523ed835d8218388e72d352e5912afe163241e62fd9276b1d8135adb79472"},
     {file = "sdss_clu-1.6.1-py3-none-any.whl", hash = "sha256:aef01a772cdb6f65169f9908e57afb252b6b9ea6f70b777222c794afd12cb125"},

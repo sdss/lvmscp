@@ -32,7 +32,7 @@ sdsstools = ">=0.4.0"
 click = "^8.1.2"
 click-default-group = "^1.2.2"
 sdss-clu = "^1.6.1"
-sdss-archon = {path = "../archon", develop = true}
+sdss-archon = "^0.6.0"
 httpx = ">=0.18.1"
 Authlib = ">=1.0.0rc1"
 # sdss-cluplus = "^0.0.14"
