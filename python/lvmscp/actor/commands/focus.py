@@ -84,8 +84,8 @@ async def focus(
 
             # Arc exposure.
             command.info("Taking arc exposure.")
-            expose_cmd = await command.child_command(
-                f"expose --arc -c {spectro} {exptime}"
+            expose_cmd = await command.send_command(
+                "lvmscp", f"expose --arc -c {spectro} {exptime}"
             )
             await expose_cmd
 
@@ -94,6 +94,7 @@ async def focus(
 
             filenames = []
             for reply in expose_cmd.replies:
+                print(reply, reply.message)
                 if "filename" in reply.message:
                     filenames.append(reply.message["filename"])
 
@@ -101,8 +102,8 @@ async def focus(
             if dark:
                 # Dark exposure, if commanded.
                 command.info("Taking dark exposure.")
-                dark_cmd = await command.child_command(
-                    f"expose --dark -c {spectro} {exptime}"
+                dark_cmd = await command.send_command(
+                    "lvmscp", f"expose --dark -c {spectro} {exptime}"
                 )
                 await dark_cmd
 
