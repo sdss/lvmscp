@@ -53,9 +53,14 @@ coverage = {version = ">=5.0", extras = ["toml"]}
 ipdb = ">=0.12.3"
 rstcheck = "^3.3.1"
 Sphinx = ">=3.0.0"
-sphinx_bootstrap_theme = ">=0.4.12"
 black = ">=22.3.0"
-sphinx-click = "^3.0.1"
+sphinx-click = ">=2.6.0"
+sphinx-jsonschema = ">=1.16.7"
+myst-parser = ">=0.14.0"
+furo = "^2021.6.18-beta.36"
+nox = "^2021.6.12"
+sphinx-autobuild = "^2021.3.14"
+sphinx-copybutton = "^0.3.3"
 
 [tool.black]
 line-length = 88

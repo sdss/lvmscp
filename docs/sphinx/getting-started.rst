@@ -2,13 +2,12 @@
 .. _getting-started:
 
 Getting started
-============================
-
+===============
 
 Introduction
 -------------
 
-SCP stands for 'Spectrograph Control Package' and lvmscp is the actor that controls the lower level actors which are controlling devices inside the spectrograph. lvmscp is based on the sdss software framework CLU. Among them, ‘sdss-clu’ is applied to create an actor that controls each hardware and executes communication.
+SCP stands for 'Spectrograph Control Package' and lvmscp is the actor that controls the lower level actors which are controlling devices inside the spectrograph. lvmscp is based on the sdss software framework CLU. Among them, `sdss-clu` is applied to create an actor that controls each hardware and executes communication.
 
 In 'CLU', We define what an *actor* is: and actor is a piece of software that performs a well defined task (control a CCD camera, interface with a database) and is a *server* that receives *commands* and replies with a series of *keywords*. If you are not familiar with those concepts, the `CLU's documentation <https://clu.readthedocs.io/en/latest/index.html>`_ is a good reference place.
 
@@ -16,11 +15,24 @@ In 'CLU', We define what an *actor* is: and actor is a piece of software that pe
 Installation
 -------------
 
-.. include:: ../../README.rst
-  :start-line: 2
+``lvmscp`` uses the `CLU <https://clu.readthedocs.io/en/latest/>`__ framework and requires a RabbitMQ instance running in the background.
+
+``lvmscp`` can be installed using ``pip`` ::
+
+  pip install sdss-lvmscp
+
+or by cloning this repository ::
+
+  git clone https://github.com/sdss/lvmscp
+
+The preferred installation for development is using `poetry <https://python-poetry.org/>`__ ::
+
+  cd lvmscp
+  poetry install
+
 
 Hardware Components
---------------------------
+-------------------
 
 Here is the Hardware and Software Component diagram in spectrograph.
 
@@ -29,7 +41,7 @@ Here is the Hardware and Software Component diagram in spectrograph.
 
 
 Architecture
---------------------------
+------------
 
 Here is the Architecture and component diagram explaining the hierarchy of lvmscp.
 lvmscp is using the AMQP Actor class from clu which is based on RabbitMQ protocol, and each actor becomes a producer/consumer to activate commands.
