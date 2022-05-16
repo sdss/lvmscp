@@ -120,9 +120,11 @@ header:
 # installed. If the path is not absolute, the root of the package is used as working
 # directory.
 archon:
-  acf_file:
-    sp1: LVM_100kHz_sp1.acf
-    sp2: LVM_100kHz_sp2.acf
+  acf_file: LVM_100kHz.acf
+  acf_overrides:
+    sp2:
+      MOD12\HEATERATARGET: -112
+      MOD12\HEATERBTARGET: -117
 
 # Write a log for each exposure (requires files.lab_log to be set).
 write_log: true
