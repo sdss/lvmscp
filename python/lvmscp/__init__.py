@@ -9,9 +9,7 @@ NAME = "sdss-lvmscp"
 # Loads config. config name is the package name.
 config = get_config("lvmscp")
 
-# Inits the logging system as NAME. Only shell logging, and exception and warning catching.
-# File logging can be started by calling log.start_file_logger(path).  Filename can be different
-# than NAME.
+# Default logger instance
 log = get_logger(NAME)
 
 

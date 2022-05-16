@@ -12,32 +12,19 @@ import os
 
 import click
 from click_default_group import DefaultGroup
-from clu.tools import cli_coro as cli_coro_lvmscp
 
+from clu.tools import cli_coro as cli_coro_lvmscp
 from sdsstools.daemonizer import DaemonGroup
 
-from lvmscp.actor.actor import lvmscp as SCPActorInstance
+from lvmscp.actor import SCPActor
 
 
 @click.group(cls=DefaultGroup, default="actor", default_if_no_args=True)
-@click.option(
-    "-c",
-    "--config",
-    "config_file",
-    type=click.Path(exists=True, dir_okay=False),
-    help="Path to the user configuration file.",
-)
-@click.option(
-    "-v",
-    "--verbose",
-    count=True,
-    help="Debug mode. Use additional v for more details.",
-)
 @click.pass_context
-def lvmscp(ctx, config_file, verbose):
-    """brings the configuration .yaml file"""
+def lvmscp(ctx):
+    """LVM SCP actor."""
 
-    ctx.obj = {"verbose": verbose, "config_file": config_file}
+    ctx.obj = {}
 
 
 @lvmscp.group(cls=DaemonGroup, prog="scp_actor", workdir=os.getcwd())
@@ -45,12 +32,11 @@ def lvmscp(ctx, config_file, verbose):
 @cli_coro_lvmscp
 async def actor(ctx):
     """Runs the actor."""
-    default_config_file = os.path.join(os.path.dirname(__file__), "etc/lvmscp.yml")
 
-    lvmscp_obj = SCPActorInstance.from_config(default_config_file)
+    lvmscp_obj = SCPActor.from_config(None)
 
     await lvmscp_obj.start()
-    await lvmscp_obj.run_forever()
+    await lvmscp_obj.run_forever()  # type: ignore
 
 
 if __name__ == "__main__":

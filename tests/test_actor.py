@@ -1,16 +1,21 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import annotations
+
 import pytest
 
-from lvmscp.actor.actor import lvmscp as ScpActor
+from lvmscp.actor import SCPActor
 
 
 @pytest.mark.asyncio
-async def test_actor(actor: ScpActor):
+async def test_actor(actor: SCPActor):
 
     assert actor
 
 
 @pytest.mark.asyncio
-async def test_ping(actor: ScpActor):
+async def test_ping(actor: SCPActor):
 
     command = await actor.invoke_mock_command("ping")
     await command
@@ -18,10 +23,3 @@ async def test_ping(actor: ScpActor):
     assert command.status.did_succeed
     assert len(command.replies) == 2
     assert command.replies[1].message["text"] == "Pong."
-
-
-@pytest.mark.asyncio
-async def test_actor_no_config():
-
-    with pytest.raises(RuntimeError):
-        ScpActor.from_config(None)

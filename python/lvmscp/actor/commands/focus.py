@@ -1,141 +1,131 @@
-import logging
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# @Author: José Sánchez-Gallego (gallegoj@uw.edu)
+# @Date: 2022-05-14
+# @Filename: focus.py
+# @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import click
 
-from sdsstools import get_logger
-
-from lvmscp.actor.supervisor import Supervisor
-
-#  import asyncio
-from . import parser
+from archon.actor.commands import parser
 
 
-# logging
-log = get_logger("sdss-lvmscp")
+if TYPE_CHECKING:
+    from archon.controller import ArchonController
 
-# lock for exposure lock
-log.sh.setLevel(logging.DEBUG)
+    from ..actor import CommandType
+
+__all__ = ["focus"]
+
+
+async def move_hds(
+    command: CommandType,
+    spectro: str,
+    side: str = "all",
+    action: str = "open",
+    verbose: bool = False,
+):
+    """Helper to open/close HDs."""
+
+    if verbose:
+        if action == "open":
+            command.info(f"Opening {side} Hartmann door(s).")
+        else:
+            command.info(f"Closing {side} Hartmann door(s).")
+
+    hd_cmd = await (
+        await command.send_command("lvmieb", f"hartmann {action} -s {side} {spectro}")
+    )
+
+    if hd_cmd.status.did_fail:
+        command.fail(
+            "Failed moving Hartmann doors. See lvmieb log for more information."
+        )
+        return False
+
+    return True
 
 
 @parser.command()
-@click.argument("COUNT", type=int, default=1, required=False)
-@click.argument("EXPTIME", type=float, required=False)
-@click.argument(
-    "spectro",
-    type=click.Choice(["sp1", "sp2", "sp3"]),
-    default="sp1",
-    required=False,
-)
-@click.option(
-    "--dark",
-    flag_value=True,
-    type=bool,
-    required=False,
-    default=False,
-    help="Option for taking dark",
-)
+@click.argument("SPECTRO", type=click.Choice(["sp1", "sp2", "sp3"]))
+@click.argument("EXPTIME", type=float)
+@click.option("-n", "--count", type=int, default=1, help="Number of focus cycles.")
+@click.option("--dark", flag_value=True, help="Take a dark along each exposure.")
 async def focus(
-    command,
-    supervisors: dict[str, Supervisor],
-    exptime: float,
-    count: int,
+    command: CommandType,
+    controllers: dict[str, ArchonController],
     spectro: str,
-    dark: bool,
+    exptime: float,
+    count: int = 1,
+    dark: bool = False,
 ):
-    """command for focusing sequence"""
+    """Take a focus sequence with both Hartmann doors."""
 
-    final_data = {}
-    # calculate the integrated time
-    for spectro in supervisors:
-        if supervisors[spectro].ready:
-            if supervisors[spectro].readoutmode == "800":
-                if dark:
-                    integ_time = (exptime + 47) * 3 * count
-                else:
-                    integ_time = (exptime + 47) * 2 * count
-            elif supervisors[spectro].readoutmode == "400":
-                if dark:
-                    integ_time = (exptime + 20) * 3 * count  # 19.4 second
-                else:
-                    integ_time = (exptime + 20) * 2 * count
+    # TODO: add a check for arc lamps or, better, command them to be on.
 
-    command.info(f"Total exposure time will be = {integ_time} sec")
+    for n in range(count):
 
-    # Check if lamp is on
-    log.debug("Checking arc lamps . . .")
-    command.info(text="Checking arc lamps . . .")
+        if count != 1:
+            command.info(f"Focus iteration {n+1} out of {count}.")
 
-    for spectro in supervisors:
-        if supervisors[spectro].ready:
-            lamps_on = await supervisors[spectro].check_arc_lamp(command)
+        for side in ["left", "right"]:
+            # Open both HDs.
+            if not (await move_hds(command, spectro, "all", "open", verbose=False)):
+                return
 
-            if lamps_on is False:
-                return command.fail(text="The arc lamps are all off . . .")
+            # Close HD.
+            if not (await move_hds(command, spectro, side, "close", verbose=True)):
+                return
 
-            final_data.update(lamps_on)
+            # Arc exposure.
+            command.info("Taking arc exposure.")
+            expose_cmd = await command.send_command(
+                "lvmscp", f"expose --arc -c {spectro} {exptime}"
+            )
+            await expose_cmd
 
-            # Loop for counts
-            # start exposure loop
-            for nn in range(count):
+            if expose_cmd.status.did_fail:
+                return command.fail("Failed taking arc exposure.")
 
-                #   set the hartmann door - left
-                command.info("hartmann left setting . . .")
-                await supervisors[spectro].SetHartmann(command, "left")
+            filenames = []
+            for reply in expose_cmd.replies:
+                if "filename" in reply.message:
+                    filenames.append(reply.message["filename"])
 
-                #   Take the arc image
-                filename = await supervisors[spectro].exposure(
-                    command, exptime, 1, "arc"
+            dark_filenames = []
+            if dark:
+                # Dark exposure, if commanded.
+                command.info("Taking dark exposure.")
+                dark_cmd = await command.send_command(
+                    "lvmscp", f"expose --dark -c {spectro} {exptime}"
                 )
+                await dark_cmd
 
-                final_data.update(
-                    {
-                        "LEFT_ARC": {
-                            "z1_arc": filename[0],
-                            "b1_arc": filename[1],
-                            "r1_arc": filename[2],
-                        }
-                    }
-                )
+                if dark_cmd.status.did_fail:
+                    return command.fail("Failed taking arc exposure.")
 
-                #   set the hartmann door - right
-                command.info("hartmann right setting . . .")
-                await supervisors[spectro].SetHartmann(command, "right")
+                for reply in dark_cmd.replies:
+                    if "filename" in reply.message:
+                        dark_filenames.append(reply.message["filename"])
 
-                #   Take the arc image
-                command.info("arc image taking . . .")
-                filename = await supervisors[spectro].exposure(
-                    command, exptime, 1, "arc"
-                )
+            command.info(
+                focus={
+                    "spectrograph": spectro,
+                    "iteration": n + 1,
+                    "side": side,
+                    "exposures": filenames,
+                    "darks": dark_filenames,
+                }
+            )
 
-                final_data.update(
-                    {
-                        "RIGHT_ARC": {
-                            "z1_arc": filename[0],
-                            "b1_arc": filename[1],
-                            "r1_arc": filename[2],
-                        }
-                    }
-                )
+    # Reopen HDs.
+    command.info("Reopening Hartmann doors.")
+    if not (await move_hds(command, spectro, "all", "open", verbose=False)):
+        return
 
-                if dark:
-                    #   take the dark image
-                    command.info("dark image taking . . .")
-
-                    filename = await supervisors[spectro].exposure(
-                        command, exptime, 1, "dark"
-                    )
-
-                    final_data.update(
-                        {
-                            "DARK": {
-                                "z1_dark": filename[0],
-                                "b1_dark": filename[1],
-                                "r1_dark": filename[2],
-                            }
-                        }
-                    )
-
-    # information of the saved files
-    print(final_data)
-    command.info(data=final_data)
     command.finish()

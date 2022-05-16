@@ -1,8 +1,9 @@
 [tool.poetry]
 name = "sdss-lvmscp"
-version = "0.2.0"
-description = "Simple Template package for creating SDSS Python projects"
+version = "0.3.0-alpha.0"
+description = "LVM spectrograph control package."
 authors = ["Changgon Kim <changgonkim@khu.ac.kr>"]
+maintainers = ["José Sánchez-Gallego <gallegoj@uw.edu>"]
 license = "BSD-3-Clause"
 readme = "README.md"
 homepage = "https://github.com/sdss/lvmscp"
@@ -20,29 +21,21 @@ classifiers = [
 packages = [
     { include = "lvmscp", from = "python" }
 ]
-include = ["python/lvmscp/etc/*", "cextern/**/*", "LICENSE.md"]
-
-[tool.poetry.build]
-script = "build.py"
-generate-setup-file = false
+include = ["python/lvmscp/etc/*"]
 
 [tool.poetry.scripts]
 lvmscp = "lvmscp.__main__:lvmscp"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.10"
-sdss-tree = ">=2.15.2"
-sdss-access = ">=0.2.3"
+python = ">=3.8,<3.11"
 sdsstools = ">=0.4.0"
-Sphinx = {version="^3.0.0", optional=true}
-sphinx_bootstrap_theme = { version = ">=0.4.12", optional=true}
 click = "^8.1.2"
 click-default-group = "^1.2.2"
-sdss-clu = "^1.0.0"
-daemonocle = "^1.2.3"
-black = "^22.3.0"
-sphinx-click = "^3.0.1"
-sdss-cluplus = "^0.0.14"
+sdss-clu = "^1.6.1"
+sdss-archon = "^0.6.0"
+httpx = ">=0.18.1"
+Authlib = ">=1.0.0rc1"
+# sdss-cluplus = "^0.0.14"
 
 [tool.poetry.dev-dependencies]
 ipython = ">=7.11.0"
@@ -59,16 +52,27 @@ codecov = ">=2.0.15"
 coverage = {version = ">=5.0", extras = ["toml"]}
 ipdb = ">=0.12.3"
 rstcheck = "^3.3.1"
+Sphinx = ">=3.0.0"
+black = ">=22.3.0"
+sphinx-click = ">=2.6.0"
+sphinx-jsonschema = ">=1.16.7"
+myst-parser = ">=0.14.0"
+furo = "^2021.6.18-beta.36"
+nox = "^2021.6.12"
+sphinx-autobuild = "^2021.3.14"
+sphinx-copybutton = "^0.3.3"
 
-[tool.poetry.extras]
-docs = ["Sphinx", "sphinx_bootstrap_theme"]
+[tool.black]
+line-length = 88
+target-version = ['py39']
+fast = true
 
 [tool.isort]
 line_length = 79
 sections = ["FUTURE", "STDLIB", "THIRDPARTY", "SDSS", "FIRSTPARTY", "LOCALFOLDER"]
 default_section = "THIRDPARTY"
 known_first_party = "lvmscp"
-known_sdss = ["sdsstools"]
+known_sdss = ["sdsstools", "clu", "archon", "cluplus"]
 balanced_wrapping = true
 include_trailing_comma = false
 lines_after_imports = 2
@@ -76,6 +80,7 @@ use_parentheses = true
 
 [tool.pytest.ini_options]
 addopts = "--cov lvmscp --cov-report xml --cov-report html --cov-report term"
+asyncio_mode = "auto"
 
 [tool.coverage.run]
 branch = true
@@ -86,8 +91,10 @@ omit = [
 
 [tool.coverage.report]
 exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING"
 ]
 
 [build-system]
-requires = ["poetry-core>=1.0.0", "setuptools>=49.6.0"]
+requires = ["poetry-core>=1.1.0a7"]
 build-backend = "poetry.core.masonry.api"
