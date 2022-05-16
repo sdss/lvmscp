@@ -94,7 +94,6 @@ async def focus(
 
             filenames = []
             for reply in expose_cmd.replies:
-                print(reply, reply.message)
                 if "filename" in reply.message:
                     filenames.append(reply.message["filename"])
 
