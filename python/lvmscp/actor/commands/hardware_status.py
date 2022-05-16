@@ -36,6 +36,7 @@ async def hardware_status(
         await command.send_command("lvmieb", ieb_command_string, new_command=True)
         for ieb_command_string in ieb_command_strings
     ]
+    print(ieb_commands)
     await asyncio.gather(*ieb_commands)
 
     for ieb_command in ieb_commands:

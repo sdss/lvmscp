@@ -17,7 +17,10 @@ import httpx
 __all__ = ["DLI"]
 
 
-class DLI(object):
+# TODO: Replace this class with calls to lvmnps.
+
+
+class DLI(object):  # pragma: no cover
     """Controller for the Digital Loggers Inc power supply."""
 
     def __init__(self):

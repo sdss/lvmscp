@@ -80,6 +80,7 @@ use_parentheses = true
 
 [tool.pytest.ini_options]
 addopts = "--cov lvmscp --cov-report xml --cov-report html --cov-report term"
+asyncio_mode = "auto"
 
 [tool.coverage.run]
 branch = true
@@ -90,6 +91,8 @@ omit = [
 
 [tool.coverage.report]
 exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING"
 ]
 
 [build-system]

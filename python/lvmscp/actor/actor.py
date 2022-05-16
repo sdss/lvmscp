@@ -145,7 +145,7 @@ class SCPActor(ArchonActor):
 
             self.lamps[lamp] = self.config["devices"]["lamps"][lamp].copy()
 
-    def get_google_client(self) -> AsyncAssertionClient | None:
+    def get_google_client(self) -> AsyncAssertionClient | None:  # pragma: no cover
         """Returns the client to communicate with the Google API."""
 
         credentials = self.config.get("credentials", None)
@@ -179,7 +179,7 @@ class SCPActor(ArchonActor):
 
         self._log_values = values
 
-    async def fill_log(self, key: Property):
+    async def fill_log(self, key: Property):  # pragma: no cover
 
         if not self.config.get("write_log", False):
             return
