@@ -137,7 +137,7 @@ copybutton_prompt_is_regexp = True
 
 html_theme = "furo"
 html_logo = "_static/sdssv_logo.png"
-html_title = "lvmieb"
+html_title = "lvmscp"
 html_favicon = "./_static/favicon.ico"
 
 # Add any paths that contain custom static files (such as style sheets) here,
