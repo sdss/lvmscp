@@ -41,13 +41,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip setuptools wheel
           poetry --version
-          poetry install
+          poetry install --without docs --with test
 
       - name: Lint with flake8
         run: |
-          pip install flake8
           # stop the build if there are Python syntax errors or undefined names
           poetry run flake8 . --count --show-source --statistics
 
