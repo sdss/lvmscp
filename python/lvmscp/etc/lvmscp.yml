@@ -57,35 +57,15 @@ timeouts:
   fetching_max: 10
   flushing: 1.2
 
-devices:
-  lamps:
-    MI150:
-      host: 10.7.45.22
-      outlet: 4
-    TS:
-      host: 10.7.45.29
-      outlet: 7
-    Argon:
-      host: 10.7.45.31
-      outlet: 1
-    Xenon:
-      host: 10.7.45.31
-      outlet: 2
-    HgAr:
-      host: 10.7.45.31
-      outlet: 3
-    LDLS:
-      host: 10.7.45.31
-      outlet: 4
-    Krypton:
-      host: 10.7.45.31
-      outlet: 5
-    Neon:
-      host: 10.7.45.31
-      outlet: 6
-    HgNe:
-      host: 10.7.45.31
-      outlet: 7
+lamps:
+  "Argon": "Argon"
+  "Xenon": "Xenon"
+  "Hg (Ar)": HgAr
+  "LDLS": "LDLS"
+  "Krypton": "Krypton"
+  "Neon": "Neon"
+  "Hg (Ne)": "HgNe"
+  "NIR LED": "NIRLED"
 
 # Header for each CCD. The key is the header keyword name. The value can
 # be a single string, a tuple with the value and comment, or a dictionary for

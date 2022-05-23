@@ -29,7 +29,6 @@ from sdsstools.configuration import read_yaml_file
 
 from lvmscp import config
 from lvmscp.delegate import LVMExposeDelegate
-from lvmscp.dli import DLI
 
 from .commands import parser
 
@@ -60,11 +59,6 @@ class SCPActor(ArchonActor):
         assert self.model
 
         self.read_credentials()
-
-        # Add lamps
-        self.dli = DLI()
-        self.lamps: dict[str, dict] = {}
-        self.add_lamps()
 
         # Add Google API client
         try:
@@ -118,32 +112,6 @@ class SCPActor(ArchonActor):
             config = cls.BASE_CONFIG
 
         return super(SCPActor, cls).from_config(config, *args, **kwargs)
-
-    def add_lamps(self):
-        """Adds the lamps."""
-
-        if "lamps" not in self.config["devices"]:
-            return
-
-        if "credentials" not in self.config or "dli" not in self.config["credentials"]:
-            warnings.warn(
-                "Credentials for DLI not found. Lamps will not be loaded.",
-                ArchonWarning,
-            )
-            return
-
-        for lamp in self.config["devices"]["lamps"]:
-            host = self.config["devices"]["lamps"][lamp]["host"]
-
-            if host not in self.dli.clients:
-                if host not in self.config["credentials"]["dli"]:
-                    warnings.warn(f"Missing credentials for DLI {host}.", ArchonWarning)
-                    continue
-                else:
-                    cred = self.config["credentials"]["dli"][host]
-                    self.dli.add_client(host, cred["user"], cred["password"])
-
-            self.lamps[lamp] = self.config["devices"]["lamps"][lamp].copy()
 
     def get_google_client(self) -> AsyncAssertionClient | None:  # pragma: no cover
         """Returns the client to communicate with the Google API."""
@@ -214,7 +182,7 @@ class SCPActor(ArchonActor):
         exptime = header["EXPTIME"]
 
         lamp_sources = []
-        for lamp in self.lamps:
+        for lamp in self.config["lamps"].values():
             if lamp.upper() in header and header[lamp.upper()] == "ON":
                 lamp_sources.append(lamp)
         lamp_sources = " ".join(lamp_sources)

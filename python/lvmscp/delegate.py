@@ -107,15 +107,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
             self.extra_data["hartmanns"][name] = await self.get_hartmann_status(name)
 
         # Lamp status.
-        self.extra_data["lamps"] = {}
-        for lamp, lamp_config in self.actor.lamps.items():
-            try:
-                value = await self.actor.dli.get_outlet_state(**lamp_config)
-                value = "ON" if value is True else "OFF"
-            except Exception as err:
-                self.command.warning(f"Failed retrieving status of lamp {lamp}: {err}")
-                value = "?"
-            self.extra_data["lamps"][lamp] = value
+        self.extra_data["lamps"] = await self.get_lamps()
 
         # Pressure from SENS4
         self.extra_data["pressure"] = {}
@@ -230,3 +222,26 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         except KeyError:
             # Fail silently.
             return {}
+
+    async def get_lamps(self) -> dict:
+        """Retrieves lamp information."""
+
+        cmd = await self.command.send_command("lvmnps", "status")
+        await cmd
+
+        # Lamp mapping from outlet name in NPS to desired header name.
+        # TODO: eventually make these match.
+        lamp_mapping = self.actor.config.get("lamps", {})
+
+        lamp_status = {}
+        try:
+            status = cmd.replies.get("status")
+            for switch in status:
+                for outlet in status[switch]:
+                    if outlet in lamp_mapping:
+                        state = "ON" if status[switch][outlet]["state"] == 1 else "OFF"
+                        lamp_status[lamp_mapping[outlet]] = state
+        except Exception as err:
+            self.command.warning(f"Failed retrieving lamp status: {err}")
+
+        return lamp_status
