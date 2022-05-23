@@ -106,6 +106,12 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
             name = controller.name
             self.extra_data["hartmanns"][name] = await self.get_hartmann_status(name)
 
+        # Temperature/RH sensors.
+        self.extra_data["sensors"] = {
+            controller.name: (await self.get_sensors(controller.name))
+            for controller in controllers
+        }
+
         # Lamp status.
         self.extra_data["lamps"] = await self.get_lamps()
 
@@ -153,6 +159,15 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
             pressure = self.extra_data.get("pressure", {}).get(ccd, -999.0)
             hdu.header["PRESSURE"] = (pressure, "Cryostat pressure [torr]")
 
+            hdu.header["LABTEMP"] = (
+                self.extra_data["sensors"][controller.name].get("t3", -999.0),
+                "Lab temperature [C]",
+            )
+            hdu.header["LABHUMID"] = (
+                self.extra_data["sensors"][controller.name].get("rh3", -999.0),
+                "Lab relative humidity [%]",
+            )
+
             depth_camera = self.extra_data["depth"].get("camera", "")
             for ch in ["A", "B", "C"]:
                 hdu.header[f"DEPTH{ch}"] = (
@@ -198,6 +213,18 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         await cmd
 
         return cmd.status.did_succeed
+
+    async def get_sensors(self, spec: str) -> dict:
+        """Returns the spectrograph temepratues and RHs."""
+
+        cmd = await self.command.send_command("lvmieb", f"wago status {spec}")
+        await cmd
+
+        try:
+            return cmd.replies.get(f"{spec}_sensors")
+        except KeyError:
+            self.command.warning(f"{spec}: failed retrieving sensor values.")
+            return {}
 
     async def get_pressure(self, spec: str) -> dict:
         """Returns the cryostat pressures."""
