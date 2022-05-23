@@ -41,6 +41,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          poetry config installer.parallel false
           poetry --version
           poetry install --without docs --with test
 
