@@ -36,12 +36,6 @@ jobs:
           path: ~/.cache/pypoetry
           key: poetry-cache-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ env.POETRY_VERSION }}
 
-      - name: Cache Packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.local
-          key: poetry-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/poetry.lock') }}-${{ hashFiles('.github/workflows/*.yml') }}
-
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -55,20 +49,12 @@ jobs:
           installer-parallel: true
           installation-arguments: --git https://github.com/python-poetry/poetry.git@master
 
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v2
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-
       - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --without docs --with test
+        run: |
+          poetry install --without docs --with test
 
       - name: Lint with flake8
         run: |
-          # stop the build if there are Python syntax errors or undefined names
           poetry run flake8 . --count --show-source --statistics
 
       - name: Lint with black
@@ -84,7 +70,7 @@ jobs:
           poetry run pytest
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1.0.3
+        uses: codecov/codecov-action@v3
         with:
-          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml
