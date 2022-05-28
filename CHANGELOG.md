@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### ✨ Improved
+
+* Reading sensor and system data is now done during integration using `ExposureDelegate.expose_cotasks()` instead of during readout, to avoid poetentially out of data information.
+
+
 ## 0.1.3 - Febuary 27, 2022
 
 Major updates:

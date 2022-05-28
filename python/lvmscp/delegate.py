@@ -94,8 +94,17 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
 
         return True
 
-    async def readout_cotasks(self):
-        """Grab sensor data during CCD readout to save time."""
+    async def expose_cotasks(self):
+        """Grab sensor data when the exposure begins to save time.
+
+        We read the sensors during the exposure to avoid out of date information
+        if, for example, the lamps are turned off during readout. However, in
+        very short exposures or biases, the cotasks may take longer than the
+        exposure itself and readout will have already begun.
+
+        """
+
+        self.command.debug("Grabbing sensor data and system status.")
 
         assert self.expose_data
         controllers = self.expose_data.controllers
