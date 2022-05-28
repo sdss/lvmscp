@@ -34,7 +34,7 @@ def delegate(actor: SCPActor, monkeypatch, tmp_path: pathlib.Path, mocker):
     mocker.patch.object(
         actor.controllers["sp1"],
         "fetch",
-        # return_value=numpy.ones((2048, 6144)),
+        return_value=(numpy.ones((2048, 6144)), 1),
     )
 
     mocker.patch.object(
