@@ -1,6 +1,6 @@
 # Changelog
 
-## Next version
+## 0.3.0 - May 28, 2022
 
 ### 🔥 Breaking changes
 
@@ -16,7 +16,7 @@
 * Improved code to retrieve lamp status from the latest version of `lvmnps`.
 
 
-## 0.1.3 - Febuary 27, 2022
+## 0.1.3 - February 27, 2022
 
 Major updates:
 
