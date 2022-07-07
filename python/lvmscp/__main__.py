@@ -20,11 +20,19 @@ from lvmscp.actor import SCPActor
 
 
 @click.group(cls=DefaultGroup, default="actor", default_if_no_args=True)
+@click.option(
+    "-r",
+    "--rmq_url",
+    "rmq_url",
+    default=None,
+    type=str,
+    help="rabbitmq url, eg: amqp://guest:guest@localhost:5672/",
+)
 @click.pass_context
-def lvmscp(ctx):
+def lvmscp(ctx, rmq_url):
     """LVM SCP actor."""
 
-    ctx.obj = {}
+    ctx.obj = {"rmq_url": rmq_url}
 
 
 @lvmscp.group(cls=DaemonGroup, prog="scp_actor", workdir=os.getcwd())
@@ -33,7 +41,7 @@ def lvmscp(ctx):
 async def actor(ctx):
     """Runs the actor."""
 
-    lvmscp_obj = SCPActor.from_config(None)
+    lvmscp_obj = SCPActor.from_config(None, url=ctx.obj["rmq_url"])
 
     await lvmscp_obj.start()
     await lvmscp_obj.run_forever()  # type: ignore
