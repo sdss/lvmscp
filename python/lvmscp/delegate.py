@@ -257,7 +257,9 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
             return cmd.replies.get("depth")
         except KeyError:
             # Fail silently.
-            return {}
+            pass
+
+        return {}
 
     async def get_lamps(self) -> dict:
         """Retrieves lamp information."""
