@@ -14,7 +14,6 @@ import os
 import pathlib
 import re
 import warnings
-from socket import getfqdn
 from typing import TYPE_CHECKING, ClassVar
 
 from astropy.io import fits
@@ -175,7 +174,7 @@ class SCPActor(ArchonActor):
         obsdate = Time(header["OBSTIME"], format="isot")
         mjd = int(obsdate.mjd)
         date_str = obsdate.strftime("%d/%m/%Y")
-        location = "SBS" if "carnegiescience" in getfqdn() else "?"
+        location = os.environ.get("OBSERVATORY", "?")
         spec = header["SPEC"]
         channel = header["CCD"]
         image_type = header["IMAGETYP"]
