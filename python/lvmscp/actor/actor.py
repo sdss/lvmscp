@@ -245,7 +245,7 @@ class SCPActor(ArchonActor):
 
         async with self._log_lock:
             spreadsheet_id = self.config["exposure_list"]["id"]
-            sheet = self.config["exposure_list"]["sheet"]
+            sheet = self.config["exposure_list"]["sheet"][spec]
 
             google_data = {
                 "range": f"{sheet}!A1:A1",
