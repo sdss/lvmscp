@@ -136,7 +136,7 @@ archon:
     sp3:
       MOD2\HEATERATARGET: -109.5
       MOD12\HEATERATARGET: -111.5
-      MOD12\HEATERBTARGET: -150
+      MOD12\HEATERBTARGET: -110.5
 
 # Write a log for each exposure (requires files.lab_log to be set).
 write_log: true
