@@ -27,12 +27,12 @@ include = ["python/lvmscp/etc/*"]
 lvmscp = "lvmscp.__main__:lvmscp"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
-sdsstools = ">=0.4.0"
+python = ">=3.8,<3.12"
+sdsstools = "^1.0.0"
 click = "^8.1.2"
 click-default-group = "^1.2.2"
 sdss-clu = "^1.6.1"
-sdss-archon = "^0.7.0"
+sdss-archon = "^0.8.0"
 httpx = ">=0.18.1"
 Authlib = ">=1.0.0rc1"
 
