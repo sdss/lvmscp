@@ -21,14 +21,6 @@ from lvmscp.actor import SCPActor
 
 @click.group(cls=DefaultGroup, default="actor", default_if_no_args=True)
 @click.option(
-    "-r",
-    "--rmq_url",
-    "rmq_url",
-    default=None,
-    type=str,
-    help="rabbitmq url, eg: amqp://guest:guest@localhost:5672/",
-)
-@click.option(
     "-c",
     "--config",
     "config_file",
@@ -36,10 +28,10 @@ from lvmscp.actor import SCPActor
     help="Path to the user configuration file.",
 )
 @click.pass_context
-def lvmscp(ctx, rmq_url: str | None = None, config_file: str | None = None):
+def lvmscp(ctx, config_file: str | None = None):
     """LVM SCP actor."""
 
-    ctx.obj = {"rmq_url": rmq_url, "config_file": config_file}
+    ctx.obj = {"config_file": config_file}
 
 
 @lvmscp.group(cls=DaemonGroup, prog="scp_actor", workdir=os.getcwd())
@@ -51,11 +43,13 @@ async def actor(ctx):
     default_config_file = os.path.join(os.path.dirname(__file__), "etc/lvmscp.yml")
     config_file = ctx.obj["config_file"] or default_config_file
 
-    lvmscp_obj = SCPActor.from_config(config_file, url=ctx.obj["rmq_url"])
+    print("Configuration file", config_file)
+
+    lvmscp_obj = SCPActor.from_config(config_file)
 
     await lvmscp_obj.start()
     await lvmscp_obj.run_forever()  # type: ignore
 
 
 if __name__ == "__main__":
-    lvmscp()
+    lvmscp(auto_envvar_prefix="LVMSCP")
