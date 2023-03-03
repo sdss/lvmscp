@@ -21,7 +21,6 @@ def test_config():
 
 @pytest.fixture()
 async def actor(test_config: dict, tmp_path: pathlib.Path):
-
     tmp_credentials = tmp_path / "credentials.yml"
     with open(tmp_credentials, "w") as f:
         f.write(

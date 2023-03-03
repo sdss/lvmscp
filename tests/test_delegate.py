@@ -26,7 +26,6 @@ if TYPE_CHECKING:
 
 @pytest.fixture()
 def delegate(actor: SCPActor, monkeypatch, tmp_path: pathlib.Path, mocker):
-
     mocker.patch.object(actor.controllers["sp1"], "set_window")
     mocker.patch.object(actor.controllers["sp1"], "expose")
     mocker.patch.object(actor.controllers["sp1"], "readout")
@@ -113,7 +112,6 @@ async def command(delegate: LVMExposeDelegate, mocker):
 
 
 async def test_delegate(delegate: LVMExposeDelegate, actor: SCPActor):
-
     assert actor.expose_delegate == delegate
 
 
@@ -123,7 +121,6 @@ async def test_delegate_expose(
     command: Command[SCPActor],
     flavour: str,
 ):
-
     result = await delegate.expose(
         command,
         [delegate.actor.controllers["sp1"]],
@@ -145,7 +142,6 @@ async def test_delegate_expose(
 
 
 async def test_expose(delegate, command, actor: SCPActor, mocker):
-
     mocker.patch.object(actor.controllers["sp1"], "is_connected", return_value=True)
 
     command = await actor.invoke_mock_command("expose -c sp1 0.01")

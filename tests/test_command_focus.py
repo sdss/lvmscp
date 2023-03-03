@@ -24,7 +24,6 @@ if TYPE_CHECKING:
     "focus_command", ["focus sp2 5", "focus --dark sp2 5", "focus -n 3 sp2 5"]
 )
 async def test_command_focus(actor: SCPActor, focus_command: str, mocker):
-
     command = Command()
     command.replies.append(Reply("i", {"filename": "/data/sdr-0001.fits"}))
     command.set_result(command)

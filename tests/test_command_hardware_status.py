@@ -18,7 +18,6 @@ if TYPE_CHECKING:
 
 
 async def test_command_hardware_status(actor: SCPActor, mocker):
-
     command = Command()
     command.set_result(command)
 

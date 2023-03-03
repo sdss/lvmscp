@@ -47,7 +47,6 @@ class SCPActor(ArchonActor):
     DELEGATE_CLASS = LVMExposeDelegate
 
     def __init__(self, *args, **kwargs):
-
         schema = self.merge_schemas(kwargs.pop("schema", None))
 
         super().__init__(*args, schema=schema, **kwargs)
@@ -147,7 +146,6 @@ class SCPActor(ArchonActor):
         self._log_values = values
 
     async def fill_log(self, key: Property):  # pragma: no cover
-
         if not self.config.get("write_log", False):
             return
 

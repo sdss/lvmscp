@@ -24,7 +24,6 @@ ORIGINAL_CALLBACK = expose.callback
 
 
 async def expose_callback(*args, **kwargs):
-
     lamp_current = kwargs.pop("lamp_current")
     test_no = kwargs.pop("test_no")
     test_iteration = kwargs.pop("test_iteration")

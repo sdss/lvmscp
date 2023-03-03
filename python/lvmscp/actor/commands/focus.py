@@ -69,7 +69,6 @@ async def focus(
     # TODO: add a check for arc lamps or, better, command them to be on.
 
     for n in range(count):
-
         if count != 1:
             command.info(f"Focus iteration {n+1} out of {count}.")
 
