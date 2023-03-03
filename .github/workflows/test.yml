@@ -56,7 +56,7 @@ jobs:
 
       - name: Lint with isort
         run: |
-          poetry run isort -c archon
+          poetry run isort -c .
 
       - name: Test with pytest
         run: |
