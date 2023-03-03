@@ -93,8 +93,8 @@ async def focus(
 
             filenames = []
             for reply in expose_cmd.replies:
-                if "filename" in reply.message:
-                    filenames.append(reply.message["filename"])
+                if "filenames" in reply.message:
+                    filenames += reply.message["filenames"]
 
             dark_filenames = []
             if dark:
@@ -109,8 +109,8 @@ async def focus(
                     return command.fail("Failed taking arc exposure.")
 
                 for reply in dark_cmd.replies:
-                    if "filename" in reply.message:
-                        dark_filenames.append(reply.message["filename"])
+                    if "filenames" in reply.message:
+                        dark_filenames += reply.message["filenames"]
 
             command.info(
                 focus={

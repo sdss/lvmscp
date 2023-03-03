@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 )
 async def test_command_focus(actor: SCPActor, focus_command: str, mocker):
     command = Command()
-    command.replies.append(Reply("i", {"filename": "/data/sdr-0001.fits"}))
+    command.replies.append(Reply("i", {"filenames": ["/data/sdr-0001.fits"]}))
     command.set_result(command)
 
     mocker.patch.object(actor, "send_command", return_value=command)

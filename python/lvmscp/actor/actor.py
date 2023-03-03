@@ -67,7 +67,7 @@ class SCPActor(ArchonActor):
 
         # Model callbacks
         self._log_lock = asyncio.Lock()
-        self.model["filename"].register_callback(self.fill_log)
+        self.model["filenames"].register_callback(self.fill_log)
 
     def merge_schemas(self, scp_schema_path: str | None = None):
         """Merge default schema with SCP one."""

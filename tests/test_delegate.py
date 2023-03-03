@@ -131,12 +131,12 @@ async def test_delegate_expose(
 
     assert result
 
-    assert delegate.actor.model and delegate.actor.model["filename"] is not None
+    assert delegate.actor.model and delegate.actor.model["filenames"] is not None
 
-    filename = delegate.actor.model["filename"].value
-    assert os.path.exists(filename)
+    filenames = delegate.actor.model["filenames"].value
+    assert os.path.exists(filenames[0])
 
-    hdu = fits.open(filename)
+    hdu = fits.open(filenames[0])
     assert hdu[0].data.shape == (100, 100)
     assert hdu[0].header["CCDTEMP1"] == -110
 
