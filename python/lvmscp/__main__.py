@@ -37,6 +37,7 @@ def cli_coro(f):
     "config_file",
     type=click.Path(exists=True, dir_okay=False),
     help="Path to the user configuration file.",
+    show_envvar=True,
 )
 @click.pass_context
 def lvmscp(ctx, config_file: str | None = None):
@@ -62,5 +63,9 @@ async def actor(ctx):
     await lvmscp_obj.run_forever()  # type: ignore
 
 
-if __name__ == "__main__":
+def main():
     lvmscp(auto_envvar_prefix="LVMSCP")
+
+
+if __name__ == "__main__":
+    main()
