@@ -8,15 +8,26 @@
 # @Filename: __main__.py
 # @License: BSD 3-clause (http://www.opensource.org/licenses/BSD-3-Clause)
 
+import asyncio
+import functools
 import os
 
 import click
 from click_default_group import DefaultGroup
 
-from clu.tools import cli_coro as cli_coro_lvmscp
 from sdsstools.daemonizer import DaemonGroup
 
 from lvmscp.actor import SCPActor
+
+
+def cli_coro(f):
+    """Decorator function that allows defining coroutines with click."""
+
+    def wrapper(*args, **kwargs):
+        loop = asyncio.get_event_loop()
+        return loop.run_until_complete(f(*args, **kwargs))
+
+    return functools.update_wrapper(wrapper, f)
 
 
 @click.group(cls=DefaultGroup, default="actor", default_if_no_args=True)
@@ -36,7 +47,7 @@ def lvmscp(ctx, config_file: str | None = None):
 
 @lvmscp.group(cls=DaemonGroup, prog="scp_actor", workdir=os.getcwd())
 @click.pass_context
-@cli_coro_lvmscp
+@cli_coro
 async def actor(ctx):
     """Runs the actor."""
 
