@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
     """Expose delegate for LVM."""
 
-    def __init__(self, actor):
+    def __init__(self, actor: SCPActor):
         super().__init__(actor)
 
         self.use_shutter = True
