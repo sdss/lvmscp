@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.4.0 - March 4, 2023
+
+### 🚀 New
+
+* Add suport for spectrograph 3.
+* Support Python 3.11.
+
+### ✨ Improved
+
+* Use `$OBSERVATORY` as spreadsheet location and use different spreadsheets for each spectrograph.
+* Support specifying the `lvmieb` actor name. This is useful when `lvmscp` and `lvmieb` are deployed in multiple instances, one per spectrograph.
+
+### 🏷️ Changed
+
+* Use unbined flushing during idle.
+
+### ⚙️ Engineering
+
+* Use `python:3.11-slim-bullseye` base image for Docker image.
+* Allow to set the configuration file to use using `$LVMSCP_CONFIG_FILE`.
+
+
 ## 0.3.0 - May 28, 2022
 
 ### 🔥 Breaking changes
