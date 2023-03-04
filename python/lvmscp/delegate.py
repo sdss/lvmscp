@@ -188,7 +188,10 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
     async def get_shutter_status(self, spec: str) -> dict | Literal[False]:
         """Returns the status of the shutter for a spectrograph."""
 
-        cmd = await self.command.send_command("lvmieb", f"shutter status {spec}")
+        spec_config = self.actor.config["controllers"][spec]
+        lvmieb_name = spec_config.get("lvmieb_actor", "lvmieb")
+
+        cmd = await self.command.send_command(lvmieb_name, f"shutter status {spec}")
         await cmd
 
         if cmd.status.did_fail:
@@ -202,7 +205,10 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
     async def get_hartmann_status(self, spec: str) -> dict:
         """Returns the status of the hartmann doors."""
 
-        cmd = await self.command.send_command("lvmieb", f"hartmann status {spec}")
+        spec_config = self.actor.config["controllers"][spec]
+        lvmieb_name = spec_config.get("lvmieb_actor", "lvmieb")
+
+        cmd = await self.command.send_command(lvmieb_name, f"hartmann status {spec}")
         await cmd
 
         try:
@@ -217,7 +223,10 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
     async def move_shutter(self, spec: str, action: str) -> bool:
         """Opens/closes a shutter."""
 
-        cmd = await self.command.send_command("lvmieb", f"shutter {action} {spec}")
+        spec_config = self.actor.config["controllers"][spec]
+        lvmieb_name = spec_config.get("lvmieb_actor", "lvmieb")
+
+        cmd = await self.command.send_command(lvmieb_name, f"shutter {action} {spec}")
         await cmd
 
         return cmd.status.did_succeed
@@ -225,7 +234,10 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
     async def get_sensors(self, spec: str) -> dict:
         """Returns the spectrograph temepratues and RHs."""
 
-        cmd = await self.command.send_command("lvmieb", f"wago status {spec}")
+        spec_config = self.actor.config["controllers"][spec]
+        lvmieb_name = spec_config.get("lvmieb_actor", "lvmieb")
+
+        cmd = await self.command.send_command(lvmieb_name, f"wago status {spec}")
         await cmd
 
         try:
@@ -237,7 +249,10 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
     async def get_pressure(self, spec: str) -> dict:
         """Returns the cryostat pressures."""
 
-        cmd = await self.command.send_command("lvmieb", f"transducer status {spec}")
+        spec_config = self.actor.config["controllers"][spec]
+        lvmieb_name = spec_config.get("lvmieb_actor", "lvmieb")
+
+        cmd = await self.command.send_command(lvmieb_name, f"transducer status {spec}")
         await cmd
 
         try:
@@ -249,7 +264,10 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
     async def read_depth_probes(self) -> dict:
         """Returns the depth probe measurements."""
 
-        cmd = await self.command.send_command("lvmieb", "depth status")
+        spec_config = list(self.actor.config["controllers"].values())[0]
+        lvmieb_name = spec_config.get("lvmieb_actor", "lvmieb")
+
+        cmd = await self.command.send_command(lvmieb_name, "depth status")
         await cmd
 
         try:

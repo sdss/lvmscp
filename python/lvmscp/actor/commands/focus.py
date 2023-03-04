@@ -51,6 +51,9 @@ async def move_hds(
     return True
 
 
+# TODO: needs rewriting for different specs.
+
+
 @parser.command()
 @click.argument("SPECTRO", type=click.Choice(["sp1", "sp2", "sp3"]))
 @click.argument("EXPTIME", type=float)
