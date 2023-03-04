@@ -39,7 +39,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
 
     async def check_expose(self) -> bool:
         """Performs a series of checks to confirm we can expose."""
-        return True
+
         base_checks = await super().check_expose()
         if not base_checks:
             return False
