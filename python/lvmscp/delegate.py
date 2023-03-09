@@ -281,7 +281,8 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
     async def get_lamps(self) -> dict:
         """Retrieves lamp information."""
 
-        cmd = await self.command.send_command("lvmnps", "status")
+        lvmnps = self.actor.config.get("lvmnps", "lvmnps")
+        cmd = await self.command.send_command(lvmnps, "status")
         await cmd
 
         # Lamp mapping from outlet name in NPS to desired header name.
