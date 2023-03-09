@@ -27,6 +27,7 @@ from clu import Command
 from sdsstools.configuration import read_yaml_file
 
 from lvmscp import config
+from lvmscp.controller import SCPController
 from lvmscp.delegate import LVMExposeDelegate
 
 from .commands import parser
@@ -45,9 +46,13 @@ class SCPActor(ArchonActor):
     parser = parser
     BASE_CONFIG: ClassVar[str | dict | None] = config
     DELEGATE_CLASS = LVMExposeDelegate
+    CONTROLLER_CLASS = SCPController
 
     def __init__(self, *args, **kwargs):
         schema = self.merge_schemas(kwargs.pop("schema", None))
+
+        # Just for typing.
+        self.controllers: dict[str, SCPController]
 
         super().__init__(*args, schema=schema, **kwargs)
 
