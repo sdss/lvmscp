@@ -154,6 +154,10 @@ files:
   split: true
   template: 'sdR-{hemisphere}-{ccd}-{exposure_no:08d}.fits.gz'
 
+checksum:
+  write: true
+  mode: md5
+
 credentials_file: ~/.config/sdss/lvmscp_credentials.yml
 
 exposure_list:
