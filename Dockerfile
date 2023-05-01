@@ -1,6 +1,6 @@
 FROM python:3.10-slim-bullseye
 
-MAINTAINER Jose Sanchez-Gallego, gallegoj@uw.ed
+MAINTAINER Jose Sanchez-Gallego, gallegoj@uw.edu
 LABEL org.opencontainers.image.source https://github.com/sdss/lvmscp
 
 WORKDIR /opt
