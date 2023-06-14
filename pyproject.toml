@@ -27,6 +27,7 @@ include = ["python/lvmscp/etc/*"]
 
 [tool.poetry.scripts]
 lvmscp = "lvmscp.__main__:main"
+ln2fill = "lvmscp.ln2:ln2fill"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
