@@ -279,7 +279,11 @@ def send_email(
     sys.stderr.flush()
 
     exc_info = sys.exc_info()
-    if issubclass(exc_info[0], click.exceptions.Exit) and exc_info[1].exit_code == 0:
+    if (
+        exc_info
+        and issubclass(exc_info[0], click.exceptions.Exit)
+        and exc_info[1].exit_code == 0
+    ):
         error = False
     else:
         error = True
@@ -430,10 +434,16 @@ async def purge_and_fill_cli(
     type=str,
     help="Comma-separated cameras to fill. Defaults to all cameras..",
 )
+@cli_coro()
 async def fill_cli(fill_time: float, cameras: str | None = None, status: bool = False):
     """Fills the cryostats."""
 
-    await fill(fill_time, cameras=cameras or ALL_CAMERAS)
+    if cameras is not None:
+        camera_list = cameras.split(",")
+    else:
+        camera_list = ALL_CAMERAS
+
+    await fill(fill_time, cameras=camera_list)
 
     if status:
         print()
@@ -450,6 +460,7 @@ async def fill_cli(fill_time: float, cameras: str | None = None, status: bool = 
     help="Purge time, in seconds. If not provided, interactively waits "
     "for the user to cancel the purge.",
 )
+@cli_coro()
 async def purge_cli(purge_time: float | None):
     """Purges the cryostats."""
 
@@ -457,6 +468,7 @@ async def purge_cli(purge_time: float | None):
 
 
 @ln2fill.command(name="abort")
+@cli_coro()
 async def abort_cli():
     """Closes all valves."""
 
