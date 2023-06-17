@@ -414,7 +414,6 @@ def ln2fill(
 async def status_cli():
     """Reports valve and LN2 temperature status."""
 
-    write_to_stdout("")
     await outlet_status()
     write_to_stdout("")
     await get_ln2_temps()
