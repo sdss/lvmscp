@@ -93,6 +93,7 @@ asyncio_mode = "auto"
 branch = true
 omit = [
     "python/lvmscp/__main__.py",
+    "python/lvmscp/ln2.py",
 ]
 
 [tool.coverage.report]
