@@ -26,6 +26,33 @@ from sdsstools.daemonizer import cli_coro
 ALL_CAMERAS = ["r1", "b1", "z1", "r2", "b2", "z2", "r3", "b3", "z3"]
 PURGE_OUTLET = ("sp1", "purge")
 
+FD: io.StringIO | None = None
+
+
+def get_now():
+    """Returns the current time, formatted as a string."""
+
+    now = datetime.datetime.utcnow()
+    now_str = now.strftime("%H:%M:%S")
+
+    return now_str
+
+
+def write_to_stdout(
+    message: str = "",
+    with_time: bool = True,
+    write_to_fd: bool = True,
+):
+    """Writes to stdout and optionally to a file."""
+
+    if with_time and message != "":
+        message = f"{get_now()}: {message}"
+
+    print(message, file=sys.__stdout__)
+
+    if write_to_fd and FD is not None:
+        print(message, file=FD)
+
 
 async def timer():
     secs = 0
@@ -78,6 +105,7 @@ async def purge(
     purge_time: float | None = None,
     purge_spec: str = PURGE_OUTLET[0],
     purge_outlet: str = PURGE_OUTLET[1],
+    show_timer: bool = True,
 ):
     """Turns on the purge solenoid. Waits for a confirmation on when to close it.
 
@@ -95,33 +123,46 @@ async def purge(
 
     MAX_TIME = 30 * 60
 
-    print("Opening purge valve ...")
-
-    now = datetime.datetime.now()
-    now_str = now.strftime("%H:%M:%S")
-    print(f"Started purge at {now_str}")
+    write_to_stdout("Opening purge valve ...")
 
     await outlet_on_off(purge_spec, purge_outlet)
 
-    timer_task = asyncio.create_task(timer())
+    write_to_stdout("Started purge.")
+
+    if purge_time is None:
+        print("Press enter to close valve.")
+
+    timer_task = asyncio.create_task(timer()) if show_timer else None
+    errored = False
+
     try:
         if purge_time is None:
-            ainput = asyncio.to_thread(input, "Press enter to close valve ")
+            ainput = asyncio.to_thread(input, "")
             await asyncio.wait_for(ainput, MAX_TIME)
         else:
             await asyncio.sleep(purge_time)
     except asyncio.TimeoutError:
+        errored = True
         raise RuntimeError("Maximum purge time reached. Closing valve.")
     finally:
-        timer_task.cancel()
+        if timer_task:
+            if errored:
+                print()
+            timer_task.cancel()
 
-        print()
-        print("Closing purge valve.")
+        if not errored:
+            write_to_stdout("Closing purge valve.")
+        else:
+            write_to_stdout("Closing purge valve due to exception.")
 
         await outlet_on_off(purge_spec, purge_outlet, on=False)
 
 
-async def fill(fill_time: float = 300, cameras: list[str] = ALL_CAMERAS):
+async def fill(
+    fill_time: float = 300,
+    cameras: list[str] = ALL_CAMERAS,
+    show_timer: bool = True,
+):
     """Fills the cryostats.
 
     Parameters
@@ -138,17 +179,15 @@ async def fill(fill_time: float = 300, cameras: list[str] = ALL_CAMERAS):
     if fill_time > MAX_TIME:
         raise RuntimeError(f"Fill time cannot be longer than {MAX_TIME} seconds.")
 
-    now = datetime.datetime.now()
-    now_str = now.strftime("%H:%M:%S")
-    print(f"Started fill at {now_str}")
+    write_to_stdout("Started fill.")
 
     # Close purge line
-    print("Closing purge valve (just in case) ...")
+    write_to_stdout("Closing purge valve (just in case) ...")
     await outlet_on_off("sp1", "Purge", on=False)
 
-    timer_task = asyncio.create_task(timer())
+    timer_task = asyncio.create_task(timer()) if show_timer else None
 
-    print("Turning on outlets ... ")
+    write_to_stdout("Turning on outlets ... ")
     on_coros = [outlet_on_off(f"sp{camera[-1]}", camera) for camera in cameras]
     for on_coro in on_coros:
         await on_coro
@@ -156,9 +195,10 @@ async def fill(fill_time: float = 300, cameras: list[str] = ALL_CAMERAS):
 
     await asyncio.sleep(fill_time)
 
-    timer_task.cancel()
+    if timer_task:
+        timer_task.cancel()
 
-    print("\nTurning off outlets ... ")
+    write_to_stdout("Turning off outlets ... ")
     off_coros = [
         outlet_on_off(
             f"sp{camera[-1]}",
@@ -176,6 +216,7 @@ async def purge_and_fill(
     purge_time: float,
     fill_time: float,
     cameras: list[str] = ALL_CAMERAS,
+    show_timer: bool = True,
 ):
     """Purges and fills the spectrographs.
 
@@ -190,17 +231,17 @@ async def purge_and_fill(
 
     """
 
-    print(f"Beginning LN2 purge ({purge_time:d} seconds).")
-    await purge(purge_time)
+    write_to_stdout(f"Beginning LN2 purge ({purge_time} seconds).")
+    await purge(purge_time, show_timer=show_timer)
 
-    print(f"Beginning LN2 fill ({fill_time:d} seconds).")
-    await fill(fill_time, cameras=cameras)
+    write_to_stdout(f"Beginning LN2 fill ({fill_time} seconds).")
+    await fill(fill_time, cameras=cameras, show_timer=show_timer)
 
 
 async def close_all():
     """Closes all the outlets"""
 
-    print("Closing all valves ... ")
+    write_to_stdout("Closing all valves ... ")
 
     off_coros = [
         outlet_on_off(
@@ -217,17 +258,17 @@ async def close_all():
     # Purge valve
     await outlet_on_off(*PURGE_OUTLET, on=False)
 
-    print("Done")
+    write_to_stdout("Done")
 
 
 async def outlet_status():
-    """Prints the valve status."""
+    """write_to_stdouts the valve status."""
 
     async with get_client() as client:
         purge_spec, purge_outlet = PURGE_OUTLET
 
-        print("Outlet status")
-        print("-------------")
+        write_to_stdout("Outlet status", with_time=False)
+        write_to_stdout("-------------", with_time=False)
 
         for outlet in ALL_CAMERAS + [purge_outlet]:
             if outlet != purge_outlet:
@@ -244,15 +285,15 @@ async def outlet_status():
             camera = list(status.keys())[0]
             state = "off" if status[camera]["state"] == 0 else "on"
 
-            print(f"{camera}: {state}")
+            write_to_stdout(f"{camera}: {state}")
 
 
 async def get_ln2_temps():
     """Returns the LN2 cryostat temperatures."""
 
     async with get_client() as client:
-        print("LN2 temperatures")
-        print("----------------")
+        write_to_stdout("LN2 temperatures", with_time=False)
+        write_to_stdout("----------------", with_time=False)
 
         for spec in ["sp1", "sp2", "sp3"]:
             for cam, mod in [
@@ -264,7 +305,7 @@ async def get_ln2_temps():
                 status = await client.send_command(actor, "status")
                 temp = float(status.replies[-2].body["status"][mod])
 
-                print(f"{cam}{spec[-1]}: {temp:.2f}")
+                write_to_stdout(f"{cam}{spec[-1]}: {temp:.2f}")
 
 
 def send_email(
@@ -278,20 +319,20 @@ def send_email(
     sys.stdout.flush()
     sys.stderr.flush()
 
-    exc_info = sys.exc_info()
+    exc_info = sys.exception()
     if (
         exc_info
-        and issubclass(exc_info[0], click.exceptions.Exit)
-        and exc_info[1].exit_code == 0
+        and isinstance(exc_info, click.exceptions.Exit)
+        and exc_info.exit_code == 0
     ):
         error = False
     else:
         error = True
-        print()
-        print("ERRORS")
-        print("------")
-        print("LN2 fill failed with error:\n")
-        traceback.print_exception(exc_info[1], file=stream)
+        write_to_stdout("")
+        write_to_stdout("ERRORS", with_time=False)
+        write_to_stdout("------", with_time=False)
+        write_to_stdout("LN2 fill failed with error:\n", with_time=False)
+        traceback.print_exception(exc_info, file=stream)
 
     sys.stdout = sys.__stdout__
     sys.stderr = sys.__stdout__
@@ -338,22 +379,23 @@ def ln2fill(
 ):
     """LN2 fill CLI."""
 
+    global FD
+
     if email:
         if len(recipient) == 0:
             raise click.UsageError("--recipient is required with --email.")
 
         # Redirect stdout and stderr to buffer.
         stream = io.StringIO()
-        sys.stdout = stream
-        sys.stderr = stream
+        FD = stream
 
-        print("OUTPUT")
-        print("------")
+        write_to_stdout("OUTPUT", with_time=False)
+        write_to_stdout("------", with_time=False)
 
         now = datetime.datetime.now()
         now_str = now.strftime("%D %H:%M:%S")
-        print(f"Running on {now_str}")
-        print()
+        write_to_stdout(f"Running on {now_str}")
+        write_to_stdout("")
 
         # Add a finaliser function that will finish formatting the output
         # and send the email.
@@ -372,9 +414,9 @@ def ln2fill(
 async def status_cli():
     """Reports valve and LN2 temperature status."""
 
-    print()
+    write_to_stdout("")
     await outlet_status()
-    print()
+    write_to_stdout("")
     await get_ln2_temps()
 
 
@@ -397,13 +439,14 @@ async def status_cli():
     "-c",
     "--cameras",
     type=str,
-    help="Comma-separated cameras to fill. Defaults to all cameras..",
+    help="Comma-separated cameras to fill. Defaults to all cameras.",
 )
 @click.option(
     "--status",
     is_flag=True,
     help="Report status after the fill.",
 )
+@click.pass_context
 @cli_coro()
 async def purge_and_fill_cli(
     purge_time: float,
@@ -413,10 +456,17 @@ async def purge_and_fill_cli(
 ):
     """Purges the vent line and fill the cryostats."""
 
+    if cameras is not None:
+        camera_list = cameras.split(",")
+    else:
+        camera_list = ALL_CAMERAS
+
+    await purge_and_fill(purge_time, fill_time, cameras=camera_list)
+
     if status:
-        print()
+        write_to_stdout("")
         await outlet_status()
-        print()
+        write_to_stdout("")
         await get_ln2_temps()
 
 
@@ -446,9 +496,9 @@ async def fill_cli(fill_time: float, cameras: str | None = None, status: bool = 
     await fill(fill_time, cameras=camera_list)
 
     if status:
-        print()
+        write_to_stdout("")
         await outlet_status()
-        print()
+        write_to_stdout("")
         await get_ln2_temps()
 
 
