@@ -9,8 +9,9 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, List, Literal, Tuple
+from typing import TYPE_CHECKING, Any, List, Literal, Tuple
 
+import numpy
 from astropy.io import fits
 
 from archon.actor import ExposureDelegate
@@ -134,6 +135,9 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         # Read depth probes
         self.extra_data["depth"] = await self.read_depth_probes()
 
+        # Get telescope information.
+        self.extra_data["telescope"] = await self.get_telescope_info()
+
         return
 
     async def post_process(
@@ -182,6 +186,15 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
                     self.extra_data["depth"][ch] if ccd == depth_camera else -999.0,
                     f"Depth probe {ch} [mm]",
                 )
+
+            for key, value in self.extra_data.get("telescope", {}).items():
+                hdu.header[key.upper()] = value
+
+            if "TILE_ID" not in hdu.header:
+                hdu.header["TILE_ID"] = (-999, "The tile_id of this observation")
+
+            if "DPOS" not in hdu.header:
+                hdu.header["DPOS"] = (0, "The dither position of this observation")
 
         return (controller, hdus)
 
@@ -275,19 +288,94 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         cmd = await self.command.send_command(lvmnps, "status")
         await cmd
 
-        # Lamp mapping from outlet name in NPS to desired header name.
-        # TODO: eventually make these match.
-        lamp_mapping = self.actor.config.get("lamps", {})
+        # The config file includes the names of the lamps that should be present.
+        lamps = self.actor.config.get("lamps", [])
 
         lamp_status = {}
         try:
             status = cmd.replies.get("status")
             for switch in status:
                 for outlet in status[switch]:
-                    if outlet in lamp_mapping:
+                    if outlet in lamps:
                         state = "ON" if status[switch][outlet]["state"] == 1 else "OFF"
-                        lamp_status[lamp_mapping[outlet]] = state
+                        lamp_status[outlet] = state
         except Exception as err:
             self.command.warning(f"Failed retrieving lamp status: {err}")
 
+        # Make sure all lamps are in the dictionary, even if the NPS did not
+        # return some.
+        for lamp_name in lamps:
+            if lamp_name not in lamp_status:
+                lamp_status[lamp_name] = "?"
+
         return lamp_status
+
+    async def get_telescope_info(self) -> dict:
+        """Retrieve telescope information."""
+
+        data: dict[str, Any] = {"telescop": "SDSS 0.16m", "survey": "LVM"}
+
+        telescopes = ["sci", "skye", "skyw", "spec"]
+        keys = ["ra", "dec", "airm", "km", "foc"]
+
+        for telescope in telescopes:
+            pwi_status: dict = {}
+            km_position: float = -999
+            foc_position: float = -999
+
+            pwi_cmd = await self.command.send_command(
+                f"lvm.{telescope}.pwi",
+                "status",
+                internal=True,
+            )
+            if pwi_cmd.status.did_fail:
+                self.command.warning(f"Failed getting {telescope} PWI information.")
+            else:
+                pwi_status = pwi_cmd.replies[-1].body
+
+            km_cmd = await self.command.send_command(
+                f"lvm.{telescope}.km",
+                "status",
+                internal=True,
+            )
+            if km_cmd.status.did_fail:
+                self.command.warning(f"Failed getting {telescope} KM information.")
+            else:
+                km_position = km_cmd.replies.get("Position")
+
+            foc_cmd = await self.command.send_command(
+                f"lvm.{telescope}.foc",
+                "status",
+                internal=True,
+            )
+            if foc_cmd.status.did_fail:
+                self.command.warning(f"Failed getting {telescope} focus information.")
+            else:
+                foc_position = foc_cmd.replies.get("Position")
+
+            for key in keys:
+                if key == "km" and telescope == "spec":
+                    continue
+
+                if key == "km":
+                    data[f"{telescope}km"] = (km_position, "K-mirror position [deg]")
+                elif key == "foc":
+                    data[f"{telescope}foc"] = (foc_position, "Focuser position [deg]")
+                elif key == "ra":
+                    ra_h: float = pwi_status.get("ra_j2000_hours", -999.0)
+                    if ra_h > 0:
+                        ra_h *= 15.0
+                    data[f"{telescope}ra"] = (ra_h, "Telescope pointing RA [deg]")
+                elif key == "dec":
+                    dec = pwi_status.get("dec_j2000_degs", -999.0)
+                    data[f"{telescope}dec"] = (dec, "Telescope pointing Dec [deg]")
+                elif key == "airm":
+                    alt = pwi_status.get("altitude_degs", None)
+                    comment = "Telescope airmass"
+                    if alt is None:
+                        data[f"{telescope}airm"] = (-999.0, comment)
+                    else:
+                        airm = 1 / numpy.cos(numpy.radians(90 - alt))
+                        data[f"{telescope}airm"] = (airm, comment)
+
+        return data

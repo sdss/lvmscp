@@ -80,14 +80,12 @@ timeouts:
   flushing: 4.7
 
 lamps:
-  'Argon': 'Argon'
-  'Xenon': 'Xenon'
-  'Hg (Ar)': HgAr
-  'LDLS': 'LDLS'
-  'Krypton': 'Krypton'
-  'Neon': 'Neon'
-  'Hg (Ne)': 'HgNe'
-  'NIR LED': 'NIRLED'
+  - Argon
+  - Xenon
+  - LDLS
+  - Neon
+  - HgNe
+  - Quartz
 
 # Header for each CCD. The key is the header keyword name. The value can
 # be a single string, a tuple with the value and comment, or a dictionary for
