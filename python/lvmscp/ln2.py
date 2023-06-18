@@ -445,7 +445,6 @@ async def status_cli():
     is_flag=True,
     help="Report status after the fill.",
 )
-@click.pass_context
 @cli_coro()
 async def purge_and_fill_cli(
     purge_time: float,
