@@ -333,15 +333,16 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
             else:
                 pwi_status = pwi_cmd.replies[-1].body
 
-            km_cmd = await self.command.send_command(
-                f"lvm.{telescope}.km",
-                "status",
-                internal=True,
-            )
-            if km_cmd.status.did_fail:
-                self.command.warning(f"Failed getting {telescope} KM information.")
-            else:
-                km_position = km_cmd.replies.get("Position")
+            if telescope != "spec":
+                km_cmd = await self.command.send_command(
+                    f"lvm.{telescope}.km",
+                    "status",
+                    internal=True,
+                )
+                if km_cmd.status.did_fail:
+                    self.command.warning(f"Failed getting {telescope} KM information.")
+                else:
+                    km_position = km_cmd.replies.get("Position")
 
             foc_cmd = await self.command.send_command(
                 f"lvm.{telescope}.foc",
