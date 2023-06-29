@@ -329,7 +329,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
                 internal=True,
             )
             if pwi_cmd.status.did_fail:
-                self.command.warning(f"Failed getting {telescope} PWI information.")
+                self.command.warning(f"Failed getting {telescope} PWI status.")
             else:
                 pwi_status = pwi_cmd.replies[-1].body
 
@@ -340,7 +340,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
                     internal=True,
                 )
                 if km_cmd.status.did_fail:
-                    self.command.warning(f"Failed getting {telescope} KM information.")
+                    self.command.warning(f"Failed getting {telescope} k-mirror status.")
                 else:
                     km_position = km_cmd.replies.get("Position")
 
@@ -350,7 +350,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
                 internal=True,
             )
             if foc_cmd.status.did_fail:
-                self.command.warning(f"Failed getting {telescope} focus information.")
+                self.command.warning(f"Failed getting {telescope} focus status.")
             else:
                 foc_position = foc_cmd.replies.get("Position")
 
