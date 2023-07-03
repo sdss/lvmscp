@@ -179,7 +179,8 @@ async def fill(
     if fill_time > MAX_TIME:
         raise RuntimeError(f"Fill time cannot be longer than {MAX_TIME} seconds.")
 
-    write_to_stdout("Started fill.")
+    cameras_join = ", ".join(cameras)
+    write_to_stdout(f"Started fill of cameras {cameras_join}.")
 
     # Close purge line
     write_to_stdout("Closing purge valve (just in case) ...")
@@ -308,6 +309,26 @@ async def get_ln2_temps():
                 write_to_stdout(f"{cam}{spec[-1]}: {temp:.2f}")
 
 
+async def get_pressures():
+    """Returns a list of cryostat pressures."""
+
+    async with get_client() as client:
+        write_to_stdout("Pressures", with_time=False)
+        write_to_stdout("---------", with_time=False)
+
+        for spec in ["sp1", "sp2", "sp3"]:
+            status = await client.send_command(f"lvmieb.{spec}", "transducer status")
+            spec_idx = spec[-1]
+            for camera in ["r", "b", "z"]:
+                key = f"{camera}{spec_idx}_pressure"
+                try:
+                    pressure = status.replies[-1].body["transducer"][key]
+                    write_to_stdout(f"{camera}{spec_idx}: {pressure:.2g}")
+                except KeyError:
+                    pressure = "???"
+                    write_to_stdout(f"{camera}{spec_idx}: {pressure}")
+
+
 def send_email(
     stream: io.StringIO,
     recipients: list[str],
@@ -417,6 +438,8 @@ async def status_cli():
     await outlet_status()
     write_to_stdout("")
     await get_ln2_temps()
+    write_to_stdout("")
+    await get_pressures()
 
 
 @ln2fill.command(name="purge-and-fill")
@@ -453,6 +476,10 @@ async def purge_and_fill_cli(
     status: bool = False,
 ):
     """Purges the vent line and fill the cryostats."""
+
+    if status:
+        await get_pressures()
+        write_to_stdout("")
 
     if cameras is not None:
         camera_list = cameras.split(",")
