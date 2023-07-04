@@ -157,6 +157,9 @@ async def purge(
 
         await outlet_on_off(purge_spec, purge_outlet, on=False)
 
+        if not errored:
+            write_to_stdout("Purge complete.")
+
 
 async def fill(
     fill_time: float = 300,
@@ -179,12 +182,12 @@ async def fill(
     if fill_time > MAX_TIME:
         raise RuntimeError(f"Fill time cannot be longer than {MAX_TIME} seconds.")
 
-    cameras_join = ", ".join(cameras)
-    write_to_stdout(f"Started fill of cameras {cameras_join}.")
-
     # Close purge line
     write_to_stdout("Closing purge valve (just in case) ...")
     await outlet_on_off("sp1", "Purge", on=False)
+
+    cameras_join = ", ".join(cameras)
+    write_to_stdout(f"Started fill of cameras {cameras_join}.")
 
     timer_task = asyncio.create_task(timer()) if show_timer else None
 
@@ -212,6 +215,8 @@ async def fill(
         await off_coro
         await asyncio.sleep(2)
 
+    write_to_stdout("Fil complete.")
+
 
 async def purge_and_fill(
     purge_time: float,
@@ -232,9 +237,14 @@ async def purge_and_fill(
 
     """
 
+    write_to_stdout("PURGE", with_time=False)
+    write_to_stdout("-----", with_time=False)
     write_to_stdout(f"Beginning LN2 purge ({purge_time} seconds).")
     await purge(purge_time, show_timer=show_timer)
 
+    write_to_stdout("", with_time=False)
+    write_to_stdout("FILL", with_time=False)
+    write_to_stdout("----", with_time=False)
     write_to_stdout(f"Beginning LN2 fill ({fill_time} seconds).")
     await fill(fill_time, cameras=cameras, show_timer=show_timer)
 
@@ -409,9 +419,6 @@ def ln2fill(
         # Redirect stdout and stderr to buffer.
         stream = io.StringIO()
         FD = stream
-
-        write_to_stdout("OUTPUT", with_time=False)
-        write_to_stdout("------", with_time=False)
 
         now = datetime.datetime.now()
         now_str = now.strftime("%D %H:%M:%S")
