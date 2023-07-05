@@ -215,7 +215,7 @@ async def fill(
         await off_coro
         await asyncio.sleep(2)
 
-    write_to_stdout("Fil complete.")
+    write_to_stdout("Fill complete.")
 
 
 async def purge_and_fill(
