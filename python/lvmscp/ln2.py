@@ -10,6 +10,7 @@ import asyncio
 import contextlib
 import datetime
 import io
+import os
 import smtplib
 import sys
 import traceback
@@ -55,6 +56,10 @@ def write_to_stdout(
 
 
 async def timer():
+    is_container = os.getenv("IS_CONTAINER", False)
+    if is_container:
+        return
+
     secs = 0
     while True:
         await asyncio.sleep(1)
@@ -99,6 +104,127 @@ async def outlet_on_off(
         command = await client.send_command(actor, command_string)
         if command.status.did_fail:
             raise RuntimeError(f"Command {actor} {command_string} failed")
+
+
+async def camera_purge(
+    camera_purge_time: float,
+    cameras: list[str] = ALL_CAMERAS,
+    parallel_specs: bool = True,
+    show_timer: bool = True,
+):
+    """Purges the camera lines.
+
+    This routine open all the ``cameras`` valves for a ``camera_purge_time``
+    period no dislodge debris in the lines before a purge and camera fill.
+    Since ``camera_purge_time`` is expected to be short, it is adjusted
+    so that the effective time the camera lines are open (including the
+    time wait between turning on different outlets) matches
+    ``camera_purge_time``.
+
+    Parameters
+    ----------
+    camera_purge_time
+        Effective time to keep the camera lines open.
+    cameras
+        A list of cameras to purge.
+    parallel_specs
+        If `True`, commands to turn on/off valves are sent to each spectrograph
+        in parallel. For each spectrograph only one outlet is operated at a time.
+    show_timer
+        Show a timer if the environment is interactive.
+
+    """
+
+    async def spec_on_off(
+        spec: str,
+        spec_cameras: list[str],
+        on: bool = True,
+        wait_time: float = 2.0,
+    ):
+        """Turns on/off cameras in one spec. Helper function."""
+
+        for ii, cam in enumerate(spec_cameras):
+            await outlet_on_off(spec, cam, on=on)
+            if ii != len(spec_cameras) - 1:
+                await asyncio.sleep(wait_time)
+
+    MAX_TIME = 30
+    OUTLET_WAIT = 2
+
+    if camera_purge_time > MAX_TIME:
+        raise RuntimeError(f"Maximum camera purge interval is {MAX_TIME}.")
+
+    spec_to_cameras: dict[str, list[str]] = {}
+    for camera in cameras:
+        spec = f"sp{camera[-1]}"
+        if spec in spec_to_cameras:
+            spec_to_cameras[spec].append(camera)
+        else:
+            spec_to_cameras[spec] = [camera]
+
+    max_cams_per_spec = max([len(gg) for gg in spec_to_cameras.values()])
+
+    actual_purge_time = camera_purge_time
+    if parallel_specs:
+        actual_purge_time -= OUTLET_WAIT * max_cams_per_spec
+    else:
+        actual_purge_time -= OUTLET_WAIT * len(cameras)
+
+    if actual_purge_time < 0:
+        raise RuntimeError("Purge time is too short.")
+
+    print(actual_purge_time)
+    timer_task = asyncio.create_task(timer()) if show_timer else None
+
+    errored = False
+    try:
+        write_to_stdout("Starting camera purge.")
+        if parallel_specs is True:
+            spec_coros = [
+                spec_on_off(spec, spec_to_cameras[spec], on=True, wait_time=OUTLET_WAIT)
+                for spec in spec_to_cameras
+            ]
+            await asyncio.gather(*spec_coros)
+        else:
+            for ii, camera in enumerate(cameras):
+                spec = f"sp{camera[-1]}"
+                await outlet_on_off(spec, camera, on=True)
+                if ii != len(cameras) - 1:
+                    await asyncio.sleep(OUTLET_WAIT)
+
+        await asyncio.sleep(actual_purge_time)
+
+    except Exception as err:
+        errored = True
+        raise RuntimeError(f"Failed running camera purge: {err}")
+
+    finally:
+        if not errored:
+            write_to_stdout("Closing camera purge valves.")
+        else:
+            write_to_stdout("Closing camera purge valves due to exception.")
+
+        if parallel_specs is True and not errored:
+            spec_coros = [
+                spec_on_off(
+                    spec, spec_to_cameras[spec], on=False, wait_time=OUTLET_WAIT
+                )
+                for spec in spec_to_cameras
+            ]
+            await asyncio.gather(*spec_coros)
+        else:
+            for ii, camera in enumerate(cameras):
+                spec = f"sp{camera[0]}"
+                await outlet_on_off(spec, camera, on=False)
+                await asyncio.sleep(OUTLET_WAIT)
+
+        if timer_task:
+            if errored:
+                print()
+            timer_task.cancel()
+
+        if not errored:
+            write_to_stdout("Camera purge complete.")
 
 
 async def purge(
@@ -221,6 +347,7 @@ async def fill(
 async def purge_and_fill(
     purge_time: float,
     fill_time: float,
+    camera_purge_time: float | None = None,
     cameras: list[str] = ALL_CAMERAS,
     show_timer: bool = True,
 ):
@@ -232,10 +359,19 @@ async def purge_and_fill(
         How long to purge for, in seconds.
     fill_time
         How long to fill the cryostats for, in seconds.
+    camera_purge_time
+        How long to purge the camera lines. If `None`, not camera purge will
+        happen.
     cameras
         What cameras to fill. A list with the format ``['r1', 'z1', 'b2', ...]``.
 
     """
+
+    if camera_purge_time:
+        write_to_stdout("CAMERA PURGE", with_time=False)
+        write_to_stdout("------------", with_time=False)
+        write_to_stdout(f"Beginning camera purge ({camera_purge_time} seconds).")
+        await camera_purge(camera_purge_time, cameras=cameras, show_timer=show_timer)
 
     write_to_stdout("PURGE", with_time=False)
     write_to_stdout("-----", with_time=False)
@@ -465,6 +601,13 @@ async def status_cli():
     help="Fill time, in seconds.",
 )
 @click.option(
+    "-P",
+    "--camera-purge-time",
+    type=float,
+    required=False,
+    help="Camera purge time, in seconds.",
+)
+@click.option(
     "-c",
     "--cameras",
     type=str,
@@ -479,6 +622,7 @@ async def status_cli():
 async def purge_and_fill_cli(
     purge_time: float,
     fill_time: float,
+    camera_purge_time: float | None = None,
     cameras: str | None = None,
     status: bool = False,
 ):
@@ -493,7 +637,12 @@ async def purge_and_fill_cli(
     else:
         camera_list = ALL_CAMERAS
 
-    await purge_and_fill(purge_time, fill_time, cameras=camera_list)
+    await purge_and_fill(
+        purge_time,
+        fill_time,
+        camera_purge_time=camera_purge_time,
+        cameras=camera_list,
+    )
 
     if status:
         write_to_stdout("")
