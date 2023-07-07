@@ -109,7 +109,7 @@ async def outlet_on_off(
 async def camera_purge(
     camera_purge_time: float,
     cameras: list[str] = ALL_CAMERAS,
-    parallel_specs: bool = True,
+    parallel_specs: bool = False,
     show_timer: bool = True,
 ):
     """Purges the camera lines.
@@ -139,7 +139,7 @@ async def camera_purge(
         spec: str,
         spec_cameras: list[str],
         on: bool = True,
-        wait_time: float = 2.0,
+        wait_time: float = 1.0,
     ):
         """Turns on/off cameras in one spec. Helper function."""
 
@@ -149,7 +149,7 @@ async def camera_purge(
                 await asyncio.sleep(wait_time)
 
     MAX_TIME = 30
-    OUTLET_WAIT = 2
+    OUTLET_WAIT = 1
 
     if camera_purge_time > MAX_TIME:
         raise RuntimeError(f"Maximum camera purge interval is {MAX_TIME}.")
