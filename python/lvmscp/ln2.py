@@ -173,7 +173,6 @@ async def camera_purge(
     if actual_purge_time < 0:
         raise RuntimeError("Purge time is too short.")
 
-    print(actual_purge_time)
     timer_task = asyncio.create_task(timer()) if show_timer else None
 
     errored = False
@@ -214,7 +213,7 @@ async def camera_purge(
             await asyncio.gather(*spec_coros)
         else:
             for ii, camera in enumerate(cameras):
-                spec = f"sp{camera[0]}"
+                spec = f"sp{camera[-1]}"
                 await outlet_on_off(spec, camera, on=False)
                 await asyncio.sleep(OUTLET_WAIT)
 
