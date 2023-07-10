@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.5.0 - July 9, 2023
+
+### 🚀 New
+
+* [#16](https://github.com/sdss/lvmscp/pull/16), [#17](https://github.com/sdss/lvmscp/pull/17), [#18](https://github.com/sdss/lvmscp/pull/18) CLI tools to control LN2 fills with camera and vent line purge.
+* [DT-4](https://jira.sdss.org/browse/DT-4) Write checksums.
+
+### ✨ Improved
+
+* Updated `archon` to `0.9.0`.
+* Add telescope and tile headers.
+
+### ⚙️ Engineering
+
+* Build Docker image using Python 3.11.
+
+
 ## 0.4.0 - March 4, 2023
 
 ### 🚀 New
