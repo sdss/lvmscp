@@ -73,7 +73,7 @@ async def timer():
 async def get_client(host="10.8.38.21"):
     """Get an AMQP client to the RabbitMQ exchange."""
 
-    client = await AMQPClient(name="ln2fill-client", host=host).start()
+    client = await AMQPClient(host=host).start()
 
     try:
         yield client
@@ -109,7 +109,7 @@ async def outlet_on_off(
 async def camera_purge(
     camera_purge_time: float,
     cameras: list[str] = ALL_CAMERAS,
-    parallel_specs: bool = False,
+    parallel_specs: bool = True,
     show_timer: bool = True,
 ):
     """Purges the camera lines.
