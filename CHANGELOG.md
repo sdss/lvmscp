@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.1 - July 13, 2023
+
+### ✨ Improved
+
+* Bump `archon` to 0.10.0 with support for asynchronous readouts.
+
+
 ## 0.5.0 - July 9, 2023
 
 ### 🚀 New
