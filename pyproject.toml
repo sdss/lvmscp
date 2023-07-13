@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sdss-lvmscp"
-version = "0.5.1"
+version = "0.5.2a0"
 description = "LVM spectrograph control package."
 authors = ["José Sánchez-Gallego <gallegoj@uw.edu>", "Changgon Kim <changgonkim@khu.ac.kr>"]
 maintainers = ["José Sánchez-Gallego <gallegoj@uw.edu>"]
