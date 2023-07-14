@@ -342,7 +342,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
                 if km_cmd.status.did_fail:
                     self.command.warning(f"Failed getting {telescope} k-mirror status.")
                 else:
-                    km_position = km_cmd.replies.get("Position")
+                    km_position = numpy.round(km_cmd.replies.get("Position"), 2)
 
             foc_cmd = await self.command.send_command(
                 f"lvm.{telescope}.foc",
@@ -352,7 +352,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
             if foc_cmd.status.did_fail:
                 self.command.warning(f"Failed getting {telescope} focus status.")
             else:
-                foc_position = foc_cmd.replies.get("Position")
+                foc_position = numpy.round(foc_cmd.replies.get("Position"), 2)
 
             for key in keys:
                 if key == "km" and telescope == "spec":
@@ -366,9 +366,11 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
                     ra_h: float = pwi_status.get("ra_j2000_hours", -999.0)
                     if ra_h > 0:
                         ra_h *= 15.0
+                        ra_h = numpy.round(ra_h, 6)
                     data[f"{telescope}ra"] = (ra_h, "Telescope pointing RA [deg]")
                 elif key == "dec":
                     dec = pwi_status.get("dec_j2000_degs", -999.0)
+                    dec = numpy.round(dec, 6)
                     data[f"{telescope}dec"] = (dec, "Telescope pointing Dec [deg]")
                 elif key == "airm":
                     alt = pwi_status.get("altitude_degs", None)
@@ -376,7 +378,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
                     if alt is None:
                         data[f"{telescope}airm"] = (-999.0, comment)
                     else:
-                        airm = 1 / numpy.cos(numpy.radians(90 - alt))
+                        airm = numpy.round(1 / numpy.cos(numpy.radians(90 - alt)), 3)
                         data[f"{telescope}airm"] = (airm, comment)
 
         return data
