@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.2 - July 17, 2023
+
+### ✨ Improved
+
+* Round up telescope values in headers.
+* Change `TRIMSEC` and `BIASSEC` header keywords. Fixed incorrect values due to the three prescan pixels and split `TRIMSEC` and `BIASEC` by amplifier.
+
+
 ## 0.5.1 - July 13, 2023
 
 ### ✨ Improved
