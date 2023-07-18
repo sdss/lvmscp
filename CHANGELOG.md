@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### 🔧 Fixed
+
+* [#20](https://github.com/sdss/lvmscp/issues/20) Update archon to 0.11 which solves the issue with exposure times being limited to 1000 seconds. Marking this as a minor release because archon 0.11 is a breaking change and requires a major modification to the ACF that is not backwards compatible.
+
+
 ## 0.5.2 - July 17, 2023
 
 ### ✨ Improved
