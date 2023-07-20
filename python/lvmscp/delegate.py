@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from typing import TYPE_CHECKING, Any, List, Literal, Tuple
 
 import numpy
@@ -164,7 +165,8 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
 
         for hdu in hdus:
             # Add SDSS MJD.
-            hdu.header["SMJD"] = (get_sjd(), "SDSS Modified Julian Date (MJD+0.4)")
+            SJD = get_sjd() if "OBSERVATORY" in os.environ else "?"
+            hdu.header["SMJD"] = (SJD, "SDSS Modified Julian Date (MJD+0.4)")
 
             hdu.header["HARTMANN"] = (f"{left} {right}", "Left/right. 0=open 1=closed")
 
