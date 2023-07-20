@@ -16,6 +16,7 @@ from astropy.io import fits
 
 from archon.actor import ExposureDelegate
 from archon.controller.controller import ArchonController
+from sdsstools.time import get_sjd
 
 
 if TYPE_CHECKING:
@@ -162,6 +163,9 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         right = hartmann[f"{controller.name}_hartmann_right"]["status"]
 
         for hdu in hdus:
+            # Add SDSS MJD.
+            hdu.header["SMJD"] = (get_sjd(), "SDSS Modified Julian Date (MJD+0.4)")
+
             hdu.header["HARTMANN"] = (f"{left} {right}", "Left/right. 0=open 1=closed")
 
             for lamp_name, value in self.extra_data.get("lamps", {}).items():

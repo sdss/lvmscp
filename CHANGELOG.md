@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### ✨ Improved
+
+* Added ``SMJD`` header keyword with the SDSS Modified Julian Date.
+
+
 ## 0.6.0 - July 18, 2023
 
 ### 🔧 Fixed
