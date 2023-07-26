@@ -140,9 +140,6 @@ archon:
       MOD12\HEATERATARGET: -111.5
       MOD12\HEATERBTARGET: -110.5
 
-# Write a log for each exposure (requires files.lab_log to be set).
-write_log: true
-
 # The base directory where the data will be saved (and MJD subdirectory is always added)
 # and the format of the saved filename. Available placeholders are {observatory} which
 # is replaced with "apo" or "lco", {hemisphere} replaced with "n" if the observatory is
@@ -159,14 +156,6 @@ files:
 checksum:
   write: true
   mode: md5
-
-credentials_file: ~/.config/sdss/lvmscp_credentials.yml
-
-exposure_list:
-  id: 103BNxjlZ59Sob3jDO4EN1z6zp2q5YrYA6nTjGlZM6XY
-  sheet:
-    sp2: 'Spec 2'
-    sp3: 'Spec 3'
 
 # Actor configuration for the AMQPActor class
 actor:
