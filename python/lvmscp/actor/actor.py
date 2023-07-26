@@ -47,18 +47,41 @@ class SCPActor(ArchonActor):
 
         assert self.model
 
-        self.read_credentials()
+        self.emit_status_task: asyncio.Task | None = None
 
-        # Add Google API client
-        try:
-            self.google_client = self.get_google_client()
-        except Exception as err:
-            warnings.warn(f"Failed authenticating with Google: {err}", ArchonWarning)
-            self.google_client = None
+    async def start(self):
+        """Starts the actor."""
 
-        # Model callbacks
-        self._log_lock = asyncio.Lock()
-        self.model["filenames"].register_callback(self.fill_log)
+        start_result = await super().start()
+
+        delay = self.config.get("status_delay", 30.0)
+        self.emit_status_task = asyncio.create_task(self.emit_status(delay))
+
+        return start_result
+
+    async def stop(self):
+        """Stops the actor and cancels tasks."""
+
+        if self.emit_status_task and not self.emit_status_task.done():
+            self.emit_status_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await self.emit_status_task
+
+        return await super().stop()
+
+    async def emit_status(self, delay: float = 30.0):
+        """Emits the status of the controller on a timer."""
+
+        await asyncio.sleep(5)
+
+        while True:
+            await Command(
+                "status",
+                actor=self,
+                commander_id=f".{self.name}",
+            ).parse()
+
+            await asyncio.sleep(delay)
 
     def merge_schemas(self, scp_schema_path: str | None = None):
         """Merge default schema with SCP one."""

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.3 - July 26, 2023
+
+### 🚨 Removed
+
+* Deleted legacy lab code to write log data and Google Sheets
+
+### ✨ Improved
+
+* The actor now emits its status on a timer with delay configurable as `status_delay`. With this `cerebro` is not required to ask for the status directly.
+
+
 ## 0.6.2 - July 26, 2023
 
 ### ✨ Improved

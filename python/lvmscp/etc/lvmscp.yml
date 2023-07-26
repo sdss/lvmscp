@@ -157,6 +157,8 @@ checksum:
   write: true
   mode: md5
 
+status_delay: 30.0
+
 # Actor configuration for the AMQPActor class
 actor:
   name: lvmscp
