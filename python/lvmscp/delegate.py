@@ -21,7 +21,9 @@ from sdsstools.time import get_sjd
 
 
 if TYPE_CHECKING:
-    from .actor import SCPActor  # noqa
+    from clu import Command
+
+    from .actor import SCPActor
 
 
 class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
@@ -30,10 +32,11 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
     def __init__(self, actor: SCPActor):
         super().__init__(actor)
 
-        self.use_shutter = True
+        self.use_shutter: bool = True
+        self.shutter_failed: bool = False
 
         # Additional data from the IEB and environmental sensors.
-        self.extra_data = {}
+        self.extra_data: dict[str, Any] = {}
 
     def reset(self):
         self.extra_data = {}
@@ -63,7 +66,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
 
         return True
 
-    async def shutter(self, open, retry=False):
+    async def shutter(self, open, is_retry=False):
         """Operate the shutter."""
 
         if not self.use_shutter:
@@ -85,16 +88,43 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         results = await asyncio.gather(*jobs, return_exceptions=True)
 
         if not all(results):
-            if action == "close" and retry is False:
+            self.shutter_failed = True
+            if is_retry is False:
                 self.command.warning(text="Some shutters failed to close. Retrying.")
-                return await self.shutter(False, retry=True)
+                return await self.shutter(open, is_retry=True)
             else:
-                return self.fail("Some shutters failed to move.")
+                self.command.error("Some shutters failed to move.")
+        else:
+            self.shutter_failed = False
 
-        if retry is True:
-            return self.fail("Closed all shutters but failing now.")
+        if self.shutter_failed:
+            if open is True:
+                return self.fail("Failed moving the shutter to open.")
+            else:
+                self.command.warning(
+                    "Shutter failed to close. Reading out exposure and failing."
+                )
 
         return True
+
+    async def readout(
+        self,
+        command: Command[SCPActor],
+        extra_header=...,
+        delay_readout: int = 0,
+        write: bool = True,
+    ):
+        """Reads detectors."""
+
+        if self.shutter_failed:
+            self.command.warning(
+                "Readout frame out but shutter failed to close. "
+                "There may be contamination in the image."
+            )
+
+        read_result = await super().readout(command, extra_header, delay_readout, write)
+
+        return False if (self.shutter_failed or not read_result) else True
 
     async def expose_cotasks(self):
         """Grab sensor data when the exposure begins to save time.
