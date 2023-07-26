@@ -4,7 +4,7 @@
 
 ### ✨ Improved
 
-* [#21](https://github.com/sdss/lvmscp/issues/21) Improve how the delegate retries opening/closing the shutter when the first attempt fails. If the shutter fails twice closing, the exposure is read anyways.
+* [#21](https://github.com/sdss/lvmscp/issues/21) Improve how the delegate retries opening/closing the shutter when the first attempt fails. If the shutter fails twice closing, the exposure is read anyway.
 
 
 ## 0.6.1 - July 20, 2023
