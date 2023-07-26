@@ -36,6 +36,8 @@ def delegate(actor: SCPActor, monkeypatch, tmp_path: pathlib.Path, mocker):
         return_value=(numpy.ones((2048, 6144)), 1),
     )
 
+    mocker.patch.object(actor.expose_delegate, "get_telescope_info", return_value={})
+
     mocker.patch.object(
         actor.expose_delegate,
         "_get_ccd_data",
@@ -150,3 +152,50 @@ async def test_expose(delegate, command, actor: SCPActor, mocker):
     await command
 
     assert command.status.did_succeed
+
+
+async def test_shutter_fails_to_open(delegate, command, mocker):
+    move_shutter = mocker.patch.object(delegate, "move_shutter", return_value=False)
+
+    result = await delegate.expose(
+        command,
+        [delegate.actor.controllers["sp1"]],
+        flavour="object",
+        exposure_time=0.1,
+        readout=True,
+    )
+
+    assert not result
+    assert move_shutter.call_count == 2
+    assert delegate.shutter_failed
+
+
+async def test_shutter_fails_to_close(delegate, command, mocker):
+    async def _move_shutter(_, action):
+        if action == "close":
+            return False
+        return True
+
+    move_shutter = mocker.patch.object(
+        delegate,
+        "move_shutter",
+        side_effect=_move_shutter,
+    )
+
+    result = await delegate.expose(
+        command,
+        [delegate.actor.controllers["sp1"]],
+        flavour="object",
+        exposure_time=0.1,
+        readout=True,
+    )
+
+    assert not result
+    assert move_shutter.call_count == 3
+    assert delegate.shutter_failed
+
+    replies = [reply.body["text"] for reply in command.replies if "text" in reply.body]
+    assert (
+        "Frame was read out but shutter failed to close. "
+        "There may be contamination in the image." in replies
+    )
