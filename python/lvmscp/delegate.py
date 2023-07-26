@@ -91,6 +91,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
             self.shutter_failed = True
             if is_retry is False:
                 self.command.warning(text="Some shutters failed to close. Retrying.")
+                await asyncio.sleep(3)
                 return await self.shutter(open, is_retry=True)
             else:
                 self.command.error("Some shutters failed to move.")
