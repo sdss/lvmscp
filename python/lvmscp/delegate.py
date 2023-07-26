@@ -100,7 +100,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
 
         if self.shutter_failed:
             if open is True:
-                return self.fail("Failed moving the shutter to open.")
+                return False
             else:
                 self.command.warning(
                     "Shutter failed to close. Reading out exposure and failing."
