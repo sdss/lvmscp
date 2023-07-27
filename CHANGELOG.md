@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.4 - July 27, 2023
+
+### 🔧 Fixed
+
+* Emit timed status messages as internal and without registering them in the log.
+
+
 ## 0.6.3 - July 26, 2023
 
 ### 🚨 Removed
