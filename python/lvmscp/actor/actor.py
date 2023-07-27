@@ -80,6 +80,7 @@ class SCPActor(ArchonActor):
                 actor=self,
                 commander_id=f".{self.name}",
                 internal=True,
+                write_to_log=False,
             ).parse()
 
             await asyncio.sleep(delay)
