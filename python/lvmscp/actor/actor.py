@@ -79,6 +79,7 @@ class SCPActor(ArchonActor):
                 "status",
                 actor=self,
                 commander_id=f".{self.name}",
+                internal=True,
             ).parse()
 
             await asyncio.sleep(delay)
