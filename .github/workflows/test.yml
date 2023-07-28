@@ -59,6 +59,8 @@ jobs:
           poetry run isort -c .
 
       - name: Test with pytest
+        env:
+          OBSERVATORY: LCO
         run: |
           poetry run pytest
 
