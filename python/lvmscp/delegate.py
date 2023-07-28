@@ -157,7 +157,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
             self.get_sensors(controller.name),
             self.get_lamps(),
             self.get_pressure(controller.name),
-            await self.read_depth_probes(),
+            self.read_depth_probes(),
             self.get_telescope_info(),
         ]
 
@@ -178,11 +178,12 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
             ccd = str(hdu.header["CCD"])
 
             # Update header with values collected during integration.
-            hdu.header.update(self.header_data)
+            for key in self.header_data:
+                hdu.header[key] = self.header_data[key]
 
             # Add SDSS MJD.
             hdu.header["SMJD"] = get_sjd() if "OBSERVATORY" in os.environ else "?"
-            hdu.header["PRESSURE"] = self.pressure_data.get(ccd, -999.0)
+            hdu.header["PRESSURE"] = self.pressure_data.get(f"{ccd}_pressure", -999.0)
 
             depth_camera = self.depth_data.get("camera", "")
             for ch in ["A", "B", "C"]:
@@ -227,8 +228,8 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         )
 
         try:
-            left = cmd.replies.get(f"{spec}_hartmann_left")["status"]["open"]
-            right = cmd.replies.get(f"{spec}_hartmann_left")["status"]["open"]
+            left = 1 if cmd.replies.get(f"{spec}_hartmann_left")["open"] else 0
+            right = 1 if cmd.replies.get(f"{spec}_hartmann_left")["open"] else 0
             self.header_data["HARTMANN"] = f"{int(left)} {int(right)}"
         except KeyError:
             self.command.warning(f"{spec}: failed retrieving hartmann door status.")
@@ -244,7 +245,8 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         )
 
         try:
-            sensors = cmd.replies.get(f"{spec}_sensors")[spec]
+            sensors = cmd.replies.get(f"{spec}_sensors")
+            self.command.info(str(sensors))
             self.header_data["LABTEMP"] = sensors.get("t3", -999.0)
             self.header_data["LABHUMID"] = sensors.get("rh3", -999.0)
         except KeyError:
@@ -274,7 +276,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         cmd = await self.command.send_command(
             lvmieb_name,
             "depth status",
-            time_limit=True,
+            time_limit=5,
         )
 
         try:
@@ -312,7 +314,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
             if lamp_name not in lamp_status:
                 self.header_data[lamp_name.upper()] = "?"
             else:
-                self.header_data[lamp_name.upper()] = lamp_status
+                self.header_data[lamp_name.upper()] = lamp_status[lamp_name]
 
     async def get_telescope_info(self):
         """Retrieve telescope information."""
