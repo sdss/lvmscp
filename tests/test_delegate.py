@@ -67,7 +67,7 @@ def delegate(actor: SCPActor, monkeypatch, tmp_path: pathlib.Path, mocker):
     yield actor.expose_delegate
 
 
-async def send_command_handler(actor: str, command_string: str):
+async def send_command_handler(actor: str, command_string: str, **kwargs):
     _child_command = Command(command_string)
 
     if actor == "lvmieb" and "shutter status" in command_string:
