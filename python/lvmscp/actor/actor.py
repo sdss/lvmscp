@@ -13,11 +13,13 @@ import json
 import os
 import pathlib
 from contextlib import suppress
+from copy import deepcopy
 from typing import ClassVar
 
 from archon.actor import ArchonActor
 from archon.actor.tools import get_schema
 from clu import Command
+from sdsstools import read_yaml_file
 
 from lvmscp import config
 from lvmscp.controller import SCPController
@@ -107,13 +109,26 @@ class SCPActor(ArchonActor):
         return schema
 
     @classmethod
-    def from_config(cls, config, *args, **kwargs):
+    def from_config(cls, iconfig, *args, **kwargs):
         """Creates an actor from a configuration file."""
 
-        if config is None:
+        if isinstance(cls.BASE_CONFIG, str):
+            cls.BASE_CONFIG = read_yaml_file(cls.BASE_CONFIG)
+
+        if iconfig is None:
             if cls.BASE_CONFIG is None:
                 raise RuntimeError("The class does not have a base configuration.")
-            config = cls.BASE_CONFIG
+            config = deepcopy(cls.BASE_CONFIG)
+        else:
+            if isinstance(cls.BASE_CONFIG, dict):
+                config = deepcopy(cls.BASE_CONFIG)
+            else:
+                config = {}
+
+            if isinstance(iconfig, str):
+                iconfig = read_yaml_file(iconfig)
+
+            config.update(iconfig)
 
         return super(SCPActor, cls).from_config(config, *args, **kwargs)
 
