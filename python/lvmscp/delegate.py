@@ -228,8 +228,8 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         )
 
         try:
-            left = 1 if cmd.replies.get(f"{spec}_hartmann_left")["open"] else 0
-            right = 1 if cmd.replies.get(f"{spec}_hartmann_left")["open"] else 0
+            left = 0 if cmd.replies.get(f"{spec}_hartmann_left")["open"] else 1
+            right = 0 if cmd.replies.get(f"{spec}_hartmann_left")["open"] else 1
             self.header_data["HARTMANN"] = f"{int(left)} {int(right)}"
         except KeyError:
             self.command.warning(f"{spec}: failed retrieving hartmann door status.")
