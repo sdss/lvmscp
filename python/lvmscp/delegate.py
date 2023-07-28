@@ -182,7 +182,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
                 hdu.header[key] = self.header_data[key]
 
             # Add SDSS MJD.
-            hdu.header["SMJD"] = get_sjd() if "OBSERVATORY" in os.environ else "?"
+            hdu.header["SMJD"] = get_sjd("LCO")
             hdu.header["PRESSURE"] = self.pressure_data.get(f"{ccd}_pressure", -999.0)
 
             depth_camera = self.depth_data.get("camera", "")
