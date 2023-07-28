@@ -92,6 +92,8 @@ lamps:
 # cases in which the value is retrieved from an archon command or when the
 # value depends on the CCD name.
 header:
+  TELESCOP: 'SDSS 0.16m'
+  SURVEY: 'LVM'
   CCDTEMP1:
     command: status
     detectors:
@@ -124,6 +126,42 @@ header:
   BIASSEC2: ['[2061:2077, 2041:4080]', 'Overscan section for quadrant 2']
   BIASSEC3: ['[2044:2060, 1:2040]', 'Overscan section for quadrant 3']
   BIASSEC4: ['[2061:2077, 1:2040]', 'Overscan section for quadrant 4']
+  TILE_ID: [-999, 'The tile_id of this observation']
+  DPOS: [0, 'Dither position']
+  BUFFER: [-1, 'The buffer number read']
+  SMJD: [-999, 'SDSS Modified Julian Date (MJD+0.4)']
+  HARTMANN: ['0 0', 'Left/right: 0=open 1=closed']
+  ARGON: ['OFF', 'Status of lamp Argon']
+  NEON: ['OFF', 'Status of lamp Neon']
+  LDLS: ['OFF', 'Status of lamp LDLS']
+  QUARTZ: ['OFF', 'Status of lamp Quartz']
+  HGNE: ['OFF', 'Status of lamp HgNe']
+  XENON: ['OFF', 'Status of lamp Xenon']
+  PRESSURE: [-999.0, 'Cryostat pressure [torr]']
+  LABTEMP: [-999.0, 'Lab temperature [C]']
+  LABHUMID: [-999.0, 'Lab relative humidity [%]']
+  DEPTHA: [-999.0, 'Depth probe A [mm]']
+  DEPTHB: [-999.0, 'Depth probe B [mm]']
+  DEPTHC: [-999.0, 'Depth probe C [mm]']
+  TESCIRA: [-999.0, 'Sci telescope pointing RA [deg]']
+  TESCIDE: [-999.0, 'Sci telescope pointing Dec [deg]']
+  TESCIAM: [-999.0, 'Sci telescope airmass']
+  TESCIKM: [-999.0, 'Sci K-mirror position [deg]']
+  TESCIFO: [-999.0, 'Sci focuser position [deg]']
+  TESKYERA: [-999.0, 'SkyE telescope pointing RA [deg]']
+  TESKYEDE: [-999.0, 'SkyE telescope pointing Dec [deg]']
+  TESKYEAM: [-999.0, 'SkyE telescope airmass']
+  TESKYEKM: [-999.0, 'SkyE K-mirror position [deg]']
+  TESKYEFO: [-999.0, 'SkyE focuser position [deg]']
+  TESKYWRA: [-999.0, 'SkyW telescope pointing RA [deg]']
+  TESKYWDE: [-999.0, 'SkyW telescope pointing Dec [deg]']
+  TESKYWAM: [-999.0, 'SkyW telescope airmass']
+  TESKYWKM: [-999.0, 'SkyW K-mirror position [deg]']
+  TESKYWFO: [-999.0, 'SkyW focuser position [deg]']
+  TESPECRA: [-999.0, 'Spec telescope initial pointing RA [deg]']
+  TESPECDE: [-999.0, 'Spec telescope initial pointing Dec [deg]']
+  TESPECAM: [-999.0, 'Spec telescope initial airmass']
+  TESPECFO: [-999.0, 'Sepc focuser position [deg]']
 
 # This is the ACF configuration file to be loaded to the Archon including the
 # timing script. {archon_etc} gets completed with the path of the etc directory once

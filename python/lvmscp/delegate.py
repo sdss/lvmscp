@@ -9,7 +9,6 @@
 from __future__ import annotations
 
 import asyncio
-import os
 from typing import TYPE_CHECKING, Any, List, Literal, Tuple
 
 import numpy
@@ -35,12 +34,20 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         self.use_shutter: bool = True
         self.shutter_failed: bool = False
 
-        # Additional data from the IEB and environmental sensors.
-        self.extra_data: dict[str, Any] = {}
+        # Header values to be collected during integration.
+        self.header_data: dict[str, Any] = {}
+
+        # Pressure and depth probe data. These data is per CCD/cryostat.
+        self.pressure_data: dict[str, float] = {}
+        self.depth_data: dict[str, float | str] = {}
 
     def reset(self):
-        self.extra_data = {}
+        self.header_data = {}
+        self.pressure_data = {}
+        self.depth_data = {}
+
         self.use_shutter = True
+
         return super().reset()
 
     async def check_expose(self) -> bool:
@@ -140,36 +147,20 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         self.command.debug("Grabbing sensor data and system status.")
 
         assert self.expose_data
-        controllers = self.expose_data.controllers
 
-        # Hartmanns status
-        self.extra_data["hartmanns"] = {}
-        for controller in controllers:
-            name = controller.name
-            self.extra_data["hartmanns"][name] = await self.get_hartmann_status(name)
+        # We expect only on controller in lvmscp.
+        controller = self.expose_data.controllers[0]
 
-        # Temperature/RH sensors.
-        self.extra_data["sensors"] = {
-            controller.name: (await self.get_sensors(controller.name))
-            for controller in controllers
-        }
+        tasks = [
+            self.get_hartmann_status(controller.name),
+            self.get_sensors(controller.name),
+            self.get_lamps(),
+            self.get_pressure(controller.name),
+            self.read_depth_probes(),
+            self.get_telescope_info(),
+        ]
 
-        # Lamp status.
-        self.extra_data["lamps"] = await self.get_lamps()
-
-        # Pressure from SENS4
-        self.extra_data["pressure"] = {}
-        for controller in controllers:
-            pressure_data = await self.get_pressure(controller.name)
-            for ccd in self.actor.config["controllers"][controller.name]["detectors"]:
-                value = pressure_data.get(f"{ccd}_pressure", -999.0)
-                self.extra_data["pressure"][ccd] = value
-
-        # Read depth probes
-        self.extra_data["depth"] = await self.read_depth_probes()
-
-        # Get telescope information.
-        self.extra_data["telescope"] = await self.get_telescope_info()
+        await asyncio.gather(*tasks)
 
         return
 
@@ -182,56 +173,21 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
 
         self.command.debug(text="Running exposure post-process.")
 
-        # Hartmanns
-        hartmann = self.extra_data["hartmanns"][controller.name]
-        for door in ["left", "right"]:
-            key = f"{controller.name}_hartmann_{door}"
-            if key not in hartmann or hartmann[key]["invalid"] is True:
-                hartmann[key]["status"] = "?"
-            else:
-                hartmann[key]["status"] = "0" if hartmann[key]["open"] else "1"
-
-        left = hartmann[f"{controller.name}_hartmann_left"]["status"]
-        right = hartmann[f"{controller.name}_hartmann_right"]["status"]
-
         for hdu in hdus:
+            ccd = str(hdu.header["CCD"])
+
+            # Update header with values collected during integration.
+            for key in self.header_data:
+                hdu.header[key] = self.header_data[key]
+
             # Add SDSS MJD.
-            SJD = get_sjd() if "OBSERVATORY" in os.environ else "?"
-            hdu.header["SMJD"] = (SJD, "SDSS Modified Julian Date (MJD+0.4)")
+            hdu.header["SMJD"] = get_sjd("LCO")
+            hdu.header["PRESSURE"] = self.pressure_data.get(f"{ccd}_pressure", -999.0)
 
-            hdu.header["HARTMANN"] = (f"{left} {right}", "Left/right. 0=open 1=closed")
-
-            for lamp_name, value in self.extra_data.get("lamps", {}).items():
-                hdu.header[lamp_name.upper()] = (value, f"Status of lamp {lamp_name}")
-
-            ccd = hdu.header["CCD"]
-            pressure = self.extra_data.get("pressure", {}).get(ccd, -999.0)
-            hdu.header["PRESSURE"] = (pressure, "Cryostat pressure [torr]")
-
-            hdu.header["LABTEMP"] = (
-                self.extra_data["sensors"][controller.name].get("t3", -999.0),
-                "Lab temperature [C]",
-            )
-            hdu.header["LABHUMID"] = (
-                self.extra_data["sensors"][controller.name].get("rh3", -999.0),
-                "Lab relative humidity [%]",
-            )
-
-            depth_camera = self.extra_data["depth"].get("camera", "")
+            depth_camera = self.depth_data.get("camera", "")
             for ch in ["A", "B", "C"]:
-                hdu.header[f"DEPTH{ch}"] = (
-                    self.extra_data["depth"][ch] if ccd == depth_camera else -999.0,
-                    f"Depth probe {ch} [mm]",
-                )
-
-            for key, value in self.extra_data.get("telescope", {}).items():
-                hdu.header[key.upper()] = value
-
-            if "TILE_ID" not in hdu.header:
-                hdu.header["TILE_ID"] = (-999, "The tile_id of this observation")
-
-            if "DPOS" not in hdu.header:
-                hdu.header["DPOS"] = (0, "The dither position of this observation")
+                depth = (self.depth_data[ch] if ccd == depth_camera else -999.0,)
+                hdu.header[f"DEPTH{ch}"] = depth
 
         return (controller, hdus)
 
@@ -250,22 +206,6 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         except KeyError:
             return False
 
-    async def get_hartmann_status(self, spec: str) -> dict:
-        """Returns the status of the hartmann doors."""
-
-        lvmieb = self.actor.controllers[spec].lvmieb
-        cmd = await self.command.send_command(lvmieb, f"hartmann status {spec}")
-        await cmd
-
-        try:
-            return {
-                f"{spec}_hartmann_left": cmd.replies.get(f"{spec}_hartmann_left"),
-                f"{spec}_hartmann_right": cmd.replies.get(f"{spec}_hartmann_right"),
-            }
-        except KeyError:
-            self.command.warning(f"{spec}: failed retrieving hartmann door status.")
-            return {}
-
     async def move_shutter(self, spec: str, action: str) -> bool:
         """Opens/closes a shutter."""
 
@@ -275,55 +215,83 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
 
         return cmd.status.did_succeed
 
-    async def get_sensors(self, spec: str) -> dict:
+    async def get_hartmann_status(self, spec: str):
+        """Returns the status of the hartmann doors."""
+
+        lvmieb = self.actor.controllers[spec].lvmieb
+
+        cmd = await self.command.send_command(
+            lvmieb,
+            f"hartmann status {spec}",
+            time_limit=5,
+        )
+
+        try:
+            left = 0 if cmd.replies.get(f"{spec}_hartmann_left")["open"] else 1
+            right = 0 if cmd.replies.get(f"{spec}_hartmann_left")["open"] else 1
+            self.header_data["HARTMANN"] = f"{int(left)} {int(right)}"
+        except KeyError:
+            self.command.warning(f"{spec}: failed retrieving hartmann door status.")
+
+    async def get_sensors(self, spec: str):
         """Returns the spectrograph temepratues and RHs."""
 
         lvmieb = self.actor.controllers[spec].lvmieb
-        cmd = await self.command.send_command(lvmieb, f"wago status {spec}")
-        await cmd
+        cmd = await self.command.send_command(
+            lvmieb,
+            f"wago status {spec}",
+            time_limit=5,
+        )
 
         try:
-            return cmd.replies.get(f"{spec}_sensors")
+            sensors = cmd.replies.get(f"{spec}_sensors")
+            self.command.info(str(sensors))
+            self.header_data["LABTEMP"] = sensors.get("t3", -999.0)
+            self.header_data["LABHUMID"] = sensors.get("rh3", -999.0)
         except KeyError:
             self.command.warning(f"{spec}: failed retrieving sensor values.")
-            return {}
 
-    async def get_pressure(self, spec: str) -> dict:
+    async def get_pressure(self, spec: str):
         """Returns the cryostat pressures."""
 
         lvmieb = self.actor.controllers[spec].lvmieb
-        cmd = await self.command.send_command(lvmieb, f"transducer status {spec}")
-        await cmd
+        cmd = await self.command.send_command(
+            lvmieb,
+            f"transducer status {spec}",
+            time_limit=5,
+        )
 
         try:
-            return cmd.replies.get("transducer")
+            self.pressure_data = cmd.replies.get("transducer")
         except KeyError:
             self.command.warning(f"{spec}: failed retrieving pressure status.")
-            return {}
 
-    async def read_depth_probes(self) -> dict:
+    async def read_depth_probes(self):
         """Returns the depth probe measurements."""
 
         spec_config = list(self.actor.config["controllers"].values())[0]
         lvmieb_name = spec_config.get("lvmieb", "lvmieb")
 
-        cmd = await self.command.send_command(lvmieb_name, "depth status")
-        await cmd
+        cmd = await self.command.send_command(
+            lvmieb_name,
+            "depth status",
+            time_limit=5,
+        )
 
         try:
-            return cmd.replies.get("depth")
+            self.depth_data = cmd.replies.get("depth")
         except KeyError:
-            # Fail silently.
             pass
 
-        return {}
-
-    async def get_lamps(self) -> dict:
+    async def get_lamps(self):
         """Retrieves lamp information."""
 
         lvmnps = self.actor.config.get("lvmnps", "lvmnps")
-        cmd = await self.command.send_command(lvmnps, "status")
-        await cmd
+        cmd = await self.command.send_command(
+            lvmnps,
+            "status",
+            time_limit=10,
+        )
 
         # The config file includes the names of the lamps that should be present.
         lamps = self.actor.config.get("lamps", [])
@@ -343,79 +311,63 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         # return some.
         for lamp_name in lamps:
             if lamp_name not in lamp_status:
-                lamp_status[lamp_name] = "?"
+                self.header_data[lamp_name.upper()] = "?"
+            else:
+                self.header_data[lamp_name.upper()] = lamp_status[lamp_name]
 
-        return lamp_status
-
-    async def get_telescope_info(self) -> dict:
+    async def get_telescope_info(self):
         """Retrieve telescope information."""
 
-        data: dict[str, Any] = {"telescop": "SDSS 0.16m", "survey": "LVM"}
-
         telescopes = ["sci", "skye", "skyw", "spec"]
-        keys = ["ra", "dec", "airm", "km", "foc"]
 
         for telescope in telescopes:
-            pwi_status: dict = {}
-            km_position: float = -999
-            foc_position: float = -999
-
             pwi_cmd = await self.command.send_command(
                 f"lvm.{telescope}.pwi",
                 "status",
                 internal=True,
+                time_limit=5,
             )
             if pwi_cmd.status.did_fail:
                 self.command.warning(f"Failed getting {telescope} PWI status.")
             else:
                 pwi_status = pwi_cmd.replies[-1].body
 
+                ra_h: float = pwi_status.get("ra_j2000_hours", -999.0)
+                if ra_h > 0:
+                    ra_d = ra_h * 15.0
+                else:
+                    ra_d = ra_h
+                self.header_data[f"TE{telescope.upper()}RA"] = numpy.round(ra_d, 6)
+
+                dec = pwi_status.get("dec_j2000_degs", -999.0)
+                self.header_data[f"TE{telescope.upper()}DE"] = numpy.round(dec, 6)
+
+                alt = pwi_status.get("altitude_degs", None)
+                if alt is not None:
+                    airm = numpy.round(1 / numpy.cos(numpy.radians(90 - alt)), 3)
+                    self.header_data[f"TE{telescope.upper()}AM"] = airm
+
             if telescope != "spec":
                 km_cmd = await self.command.send_command(
                     f"lvm.{telescope}.km",
                     "status",
                     internal=True,
+                    time_limit=5,
                 )
                 if km_cmd.status.did_fail:
                     self.command.warning(f"Failed getting {telescope} k-mirror status.")
                 else:
                     km_position = numpy.round(km_cmd.replies.get("Position"), 2)
+                    self.header_data[f"TE{telescope.upper()}KM"] = km_position
 
             foc_cmd = await self.command.send_command(
                 f"lvm.{telescope}.foc",
                 "status",
                 internal=True,
+                time_limit=5,
             )
             if foc_cmd.status.did_fail:
                 self.command.warning(f"Failed getting {telescope} focus status.")
             else:
                 foc_position = numpy.round(foc_cmd.replies.get("Position"), 2)
-
-            for key in keys:
-                if key == "km" and telescope == "spec":
-                    continue
-
-                if key == "km":
-                    data[f"{telescope}km"] = (km_position, "K-mirror position [deg]")
-                elif key == "foc":
-                    data[f"{telescope}foc"] = (foc_position, "Focuser position [deg]")
-                elif key == "ra":
-                    ra_h: float = pwi_status.get("ra_j2000_hours", -999.0)
-                    if ra_h > 0:
-                        ra_h *= 15.0
-                        ra_h = numpy.round(ra_h, 6)
-                    data[f"{telescope}ra"] = (ra_h, "Telescope pointing RA [deg]")
-                elif key == "dec":
-                    dec = pwi_status.get("dec_j2000_degs", -999.0)
-                    dec = numpy.round(dec, 6)
-                    data[f"{telescope}dec"] = (dec, "Telescope pointing Dec [deg]")
-                elif key == "airm":
-                    alt = pwi_status.get("altitude_degs", None)
-                    comment = "Telescope airmass"
-                    if alt is None:
-                        data[f"{telescope}airm"] = (-999.0, comment)
-                    else:
-                        airm = numpy.round(1 / numpy.cos(numpy.radians(90 - alt)), 3)
-                        data[f"{telescope}airm"] = (airm, comment)
-
-        return data
+                self.header_data[f"TE{telescope.upper()}FO"] = foc_position
