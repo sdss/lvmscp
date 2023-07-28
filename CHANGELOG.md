@@ -1,5 +1,13 @@
 # Changelog
 
+## New version
+
+### ✨ Improved
+
+* Custom configuration is now merged with the default, internal configuration.
+* Clean-up how header keywords are compiled and how defaults are set.
+
+
 ## 0.6.4 - July 27, 2023
 
 ### 🔧 Fixed
