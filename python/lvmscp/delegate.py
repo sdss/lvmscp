@@ -245,7 +245,6 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
 
         try:
             sensors = cmd.replies.get(f"{spec}_sensors")
-            self.command.info(str(sensors))
             self.header_data["LABTEMP"] = sensors.get("t3", -999.0)
             self.header_data["LABHUMID"] = sensors.get("rh3", -999.0)
         except KeyError:
@@ -296,24 +295,15 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         # The config file includes the names of the lamps that should be present.
         lamps = self.actor.config.get("lamps", [])
 
-        lamp_status = {}
         try:
             status = cmd.replies.get("status")
             for switch in status:
                 for outlet in status[switch]:
                     if outlet in lamps:
                         state = "ON" if status[switch][outlet]["state"] == 1 else "OFF"
-                        lamp_status[outlet] = state
+                        self.header_data[outlet.upper()] = state
         except Exception as err:
             self.command.warning(f"Failed retrieving lamp status: {err}")
-
-        # Make sure all lamps are in the dictionary, even if the NPS did not
-        # return some.
-        for lamp_name in lamps:
-            if lamp_name not in lamp_status:
-                self.header_data[lamp_name.upper()] = "?"
-            else:
-                self.header_data[lamp_name.upper()] = lamp_status[lamp_name]
 
     async def get_telescope_info(self):
         """Retrieve telescope information."""
