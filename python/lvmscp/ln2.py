@@ -11,6 +11,7 @@ import contextlib
 import datetime
 import io
 import os
+import pathlib
 import smtplib
 import sys
 import traceback
@@ -18,6 +19,7 @@ from email.message import EmailMessage
 from functools import partial
 
 import click
+import numpy
 from click_default_group import DefaultGroup
 
 from clu.client import AMQPClient
@@ -26,6 +28,11 @@ from sdsstools.daemonizer import cli_coro
 
 ALL_CAMERAS = ["r1", "b1", "z1", "r2", "b2", "z2", "r3", "b3", "z3"]
 PURGE_OUTLET = ("sp1", "purge")
+
+# Pressure above which we don't purge/fill.
+PRESSURE_LIMIT = 1e-3
+
+LOCKFILE = pathlib.Path("/data/ln2fill.lock")
 
 FD: io.StringIO | None = None
 
@@ -231,6 +238,7 @@ async def purge(
     purge_spec: str = PURGE_OUTLET[0],
     purge_outlet: str = PURGE_OUTLET[1],
     show_timer: bool = True,
+    check_pressure: bool = True,
 ):
     """Turns on the purge solenoid. Waits for a confirmation on when to close it.
 
@@ -243,8 +251,21 @@ async def purge(
         Spectrograph NPS that contains the outlet for the purge solenoid.
     purge_outlet
         Name of the outlet for the purge solenoid.
+    check_pressure
+        If `True`, reads the cryostats pressures and aborts the purge
+        if any of them are above the pressure threshold.
 
     """
+
+    check_lockfile()
+
+    if check_pressure:
+        pressures = numpy.array((await get_pressures()).values())
+        if numpy.any(numpy.isnan(pressures)) or numpy.any(pressures > PRESSURE_LIMIT):
+            raise RuntimeError(
+                "One or more cameras have pressures "
+                "above the limit. Aborting the purge."
+            )
 
     MAX_TIME = 30 * 60
 
@@ -265,7 +286,18 @@ async def purge(
             ainput = asyncio.to_thread(input, "")
             await asyncio.wait_for(ainput, MAX_TIME)
         else:
-            await asyncio.sleep(purge_time)
+            # Wait the purge_time but check if the lockfile exists every second
+            # and if so, cancel the purge.
+            elapsed = 0.0
+            while True:
+                await asyncio.sleep(1)
+                elapsed += 1
+
+                if elapsed >= purge_time:
+                    break
+
+                check_lockfile()
+
     except asyncio.TimeoutError:
         errored = True
         raise RuntimeError("Maximum purge time reached. Closing valve.")
@@ -290,6 +322,7 @@ async def fill(
     fill_time: float = 300,
     cameras: list[str] = ALL_CAMERAS,
     show_timer: bool = True,
+    check_pressure: bool = True,
 ):
     """Fills the cryostats.
 
@@ -299,8 +332,23 @@ async def fill(
         How long to fill the cryostats for, in seconds.
     cameras
         What cameras to fill. A list with the format ``['r1', 'z1', 'b2', ...]``.
+    check_pressure
+        If `True`, reads the cryostats pressures and aborts the fill
+        if any of them are above the pressure threshold.
 
     """
+
+    check_lockfile()
+
+    if check_pressure:
+        pressures = await get_pressures()
+        for cam in cameras:
+            pcam = pressures.get(cam, numpy.nan)
+            if numpy.isnan(pcam) or pcam > PRESSURE_LIMIT:
+                raise RuntimeError(
+                    "One or more cameras have pressures "
+                    "above the limit. Aborting the fill."
+                )
 
     MAX_TIME = 600
 
@@ -322,7 +370,21 @@ async def fill(
         await on_coro
         await asyncio.sleep(2)
 
-    await asyncio.sleep(fill_time)
+    # Wait the fill_time but check if the lockfile exists every second
+    # and if so, cancel the purge.
+    elapsed = 0.0
+    failed: bool = False
+    while True:
+        await asyncio.sleep(1)
+        elapsed += 1
+
+        if elapsed >= fill_time:
+            break
+
+        if LOCKFILE.exists():
+            write_to_stdout("Lockfile found. Cancelling fill.")
+            failed = True
+            break
 
     if timer_task:
         timer_task.cancel()
@@ -340,6 +402,9 @@ async def fill(
         await off_coro
         await asyncio.sleep(2)
 
+    if failed:
+        raise RuntimeError("Fill failed.")
+
     write_to_stdout("Fill complete.")
 
 
@@ -349,6 +414,7 @@ async def purge_and_fill(
     camera_purge_time: float | None = None,
     cameras: list[str] = ALL_CAMERAS,
     show_timer: bool = True,
+    check_pressure: bool = True,
 ):
     """Purges and fills the spectrographs.
 
@@ -363,8 +429,13 @@ async def purge_and_fill(
         happen.
     cameras
         What cameras to fill. A list with the format ``['r1', 'z1', 'b2', ...]``.
+    check_pressure
+        If `True`, reads the cryostats pressures and aborts the purge and fill
+        if any of them are above the pressure threshold.
 
     """
+
+    check_lockfile()
 
     if camera_purge_time:
         write_to_stdout("CAMERA PURGE", with_time=False)
@@ -375,13 +446,13 @@ async def purge_and_fill(
     write_to_stdout("PURGE", with_time=False)
     write_to_stdout("-----", with_time=False)
     write_to_stdout(f"Beginning LN2 purge ({purge_time} seconds).")
-    await purge(purge_time, show_timer=show_timer)
+    await purge(purge_time, show_timer=show_timer, check_pressure=check_pressure)
 
     write_to_stdout("", with_time=False)
     write_to_stdout("FILL", with_time=False)
     write_to_stdout("----", with_time=False)
     write_to_stdout(f"Beginning LN2 fill ({fill_time} seconds).")
-    await fill(fill_time, cameras=cameras, show_timer=show_timer)
+    await fill(fill_time, cameras=cameras, show_timer=show_timer, check_pressure=False)
 
 
 async def close_all():
@@ -454,12 +525,15 @@ async def get_ln2_temps():
                 write_to_stdout(f"{cam}{spec[-1]}: {temp:.2f}")
 
 
-async def get_pressures():
+async def get_pressures(print: bool = True):
     """Returns a list of cryostat pressures."""
 
+    pressures: dict[str, float] = {}
+
     async with get_client() as client:
-        write_to_stdout("Pressures", with_time=False)
-        write_to_stdout("---------", with_time=False)
+        if print:
+            write_to_stdout("Pressures", with_time=False)
+            write_to_stdout("---------", with_time=False)
 
         for spec in ["sp1", "sp2", "sp3"]:
             status = await client.send_command(f"lvmieb.{spec}", "transducer status")
@@ -468,10 +542,25 @@ async def get_pressures():
                 key = f"{camera}{spec_idx}_pressure"
                 try:
                     pressure = status.replies[-1].body["transducer"][key]
-                    write_to_stdout(f"{camera}{spec_idx}: {pressure:.2g}")
+                    pressures[f"{camera}{spec_idx}"] = float(pressure)
+                    if print:
+                        write_to_stdout(f"{camera}{spec_idx}: {pressure:.2g}")
                 except KeyError:
                     pressure = "???"
+                    pressures[f"{camera}{spec_idx}"] = numpy.nan
                     write_to_stdout(f"{camera}{spec_idx}: {pressure}")
+
+    return pressures
+
+
+def check_lockfile():
+    """Checks if the lockfile exists and raises an error."""
+
+    if LOCKFILE.exists():
+        raise ValueError(
+            "Lock file found. Fills are not allowed. "
+            "Use ln2fill clear to remove the lock."
+        )
 
 
 def send_email(
@@ -617,6 +706,13 @@ async def status_cli():
     is_flag=True,
     help="Report status after the fill.",
 )
+@click.option(
+    "--check-pressure/--no-check-pressure",
+    is_flag=True,
+    default=True,
+    help="If set, checks the cryostats pressures before a purge and cancels it if "
+    "any camera is above the fill threshold.",
+)
 @cli_coro()
 async def purge_and_fill_cli(
     purge_time: float,
@@ -624,6 +720,7 @@ async def purge_and_fill_cli(
     camera_purge_time: float | None = None,
     cameras: str | None = None,
     status: bool = False,
+    check_pressure: bool = True,
 ):
     """Purges the vent line and fill the cryostats."""
 
@@ -641,6 +738,7 @@ async def purge_and_fill_cli(
         fill_time,
         camera_purge_time=camera_purge_time,
         cameras=camera_list,
+        check_pressure=check_pressure,
     )
 
     if status:
@@ -664,8 +762,20 @@ async def purge_and_fill_cli(
     type=str,
     help="Comma-separated cameras to fill. Defaults to all cameras..",
 )
+@click.option(
+    "--check-pressure/--no-check-pressure",
+    is_flag=True,
+    default=True,
+    help="If set, checks the cryostats pressures before a purge and cancels it if "
+    "any camera is above the fill threshold.",
+)
 @cli_coro()
-async def fill_cli(fill_time: float, cameras: str | None = None, status: bool = False):
+async def fill_cli(
+    fill_time: float,
+    cameras: str | None = None,
+    status: bool = False,
+    check_pressure: bool = True,
+):
     """Fills the cryostats."""
 
     if cameras is not None:
@@ -673,7 +783,7 @@ async def fill_cli(fill_time: float, cameras: str | None = None, status: bool = 
     else:
         camera_list = ALL_CAMERAS
 
-    await fill(fill_time, cameras=camera_list)
+    await fill(fill_time, cameras=camera_list, check_pressure=check_pressure)
 
     if status:
         write_to_stdout("")
@@ -690,16 +800,44 @@ async def fill_cli(fill_time: float, cameras: str | None = None, status: bool = 
     help="Purge time, in seconds. If not provided, interactively waits "
     "for the user to cancel the purge.",
 )
+@click.option(
+    "--check-pressure/--no-check-pressure",
+    is_flag=True,
+    default=True,
+    help="If set, checks the cryostats pressures before a purge and cancels it if "
+    "any camera is above the fill threshold.",
+)
 @cli_coro()
-async def purge_cli(purge_time: float | None):
+async def purge_cli(purge_time: float | None, check_pressure: bool = True):
     """Purges the cryostats."""
 
-    await purge(purge_time)
+    await purge(purge_time, check_pressure=check_pressure)
 
 
 @ln2fill.command(name="abort")
+@click.option(
+    "--no-lock",
+    is_flag=True,
+    help="Closes all valves but does not lock the fill system.",
+)
 @cli_coro()
-async def abort_cli():
-    """Closes all valves."""
+async def abort_cli(no_lock: bool = True):
+    """Closes all valves and prevents future purges/files."""
 
     await close_all()
+
+    if no_lock is False:
+        write_to_stdout(
+            f"Writing {LOCKFILE!s}. Future purges/fills will be blocked. "
+            "Use ln2fill clear or manually remove the file to clear the lock."
+        )
+
+        LOCKFILE.touch()
+
+
+@ln2fill.command(name="clear")
+@cli_coro()
+async def clear_cli():
+    """Clears the lockfile preventing purges/fills to happen."""
+
+    LOCKFILE.unlink(missing_ok=True)

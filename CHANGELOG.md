@@ -4,6 +4,8 @@
 
 ### ✨ Improved
 
+* [#23](https://github.com/sdss/lvmscp/pull/23) `ln2fill abort` now creates a lockfile in `/data/ln2fill.lock` that, if present, prevents new purges or fills. It can be removed with `ln2fill clear`.
+* [#23](https://github.com/sdss/lvmscp/pull/23) By default the pressure of the cryostats is checked before a purge or fill. If any camera is above the threshold the purge/fill is aborted.
 * Custom configuration is now merged with the default, internal configuration.
 * Clean-up how header keywords are compiled and how defaults are set.
 
