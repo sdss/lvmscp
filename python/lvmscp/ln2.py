@@ -340,15 +340,24 @@ async def fill(
 
     check_lockfile()
 
+    # If check_pressure=True, we check ALL the pressures and abort if any are above
+    # the threshold. This is because the cameras may still be connected via the vent
+    # line and by filling one camera with ok pressure we may be filling a different
+    # one with pressure over the limit.
+    # If check_pressure=False we only check the cameras that we are going to fill.
     if check_pressure:
-        pressures = await get_pressures()
-        for cam in cameras:
-            pcam = pressures.get(cam, numpy.nan)
-            if numpy.isnan(pcam) or pcam > PRESSURE_LIMIT:
-                raise RuntimeError(
-                    "One or more cameras have pressures "
-                    "above the limit. Aborting the fill."
-                )
+        cameras_to_check = ALL_CAMERAS
+    else:
+        cameras_to_check = cameras
+
+    pressures = await get_pressures()
+    for cam in cameras_to_check:
+        pcam = pressures.get(cam, numpy.nan)
+        if numpy.isnan(pcam) or pcam > PRESSURE_LIMIT:
+            raise RuntimeError(
+                "One or more cameras have pressures "
+                "above the limit. Aborting the fill."
+            )
 
     MAX_TIME = 600
 
