@@ -32,7 +32,7 @@ PURGE_OUTLET = ("sp1", "purge")
 # Pressure above which we don't purge/fill.
 PRESSURE_LIMIT = 1e-3
 
-LOCKFILE = pathlib.Path("/home/sdss5/.config/ln2fill.lock")
+LOCKFILE = pathlib.Path("/data/ln2fill.lock")
 
 FD: io.StringIO | None = None
 
