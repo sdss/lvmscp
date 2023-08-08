@@ -260,7 +260,7 @@ async def purge(
     check_lockfile()
 
     if check_pressure:
-        pressures = numpy.array(list((await get_pressures()).values()))
+        pressures = numpy.array(list((await get_pressures(print=False)).values()))
         if numpy.any(numpy.isnan(pressures)) or numpy.any(pressures > PRESSURE_LIMIT):
             raise RuntimeError(
                 "One or more cameras have pressures "
@@ -350,7 +350,7 @@ async def fill(
     else:
         cameras_to_check = cameras
 
-    pressures = await get_pressures()
+    pressures = await get_pressures(print=False)
     for cam in cameras_to_check:
         pcam = pressures.get(cam, numpy.nan)
         if numpy.isnan(pcam) or pcam > PRESSURE_LIMIT:
