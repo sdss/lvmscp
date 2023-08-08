@@ -11,6 +11,7 @@ import contextlib
 import datetime
 import io
 import os
+import pathlib
 import smtplib
 import sys
 import traceback
@@ -30,6 +31,8 @@ PURGE_OUTLET = ("sp1", "purge")
 
 # Pressure above which we don't purge/fill.
 PRESSURE_LIMIT = 1e-3
+
+LOCKFILE = pathlib.Path("/home/sdss5/.config/ln2fill.lock")
 
 FD: io.StringIO | None = None
 
@@ -254,6 +257,8 @@ async def purge(
 
     """
 
+    check_lockfile()
+
     if check_pressure:
         pressures = numpy.array((await get_pressures()).values())
         if numpy.any(numpy.isnan(pressures)) or numpy.any(pressures > PRESSURE_LIMIT):
@@ -281,7 +286,18 @@ async def purge(
             ainput = asyncio.to_thread(input, "")
             await asyncio.wait_for(ainput, MAX_TIME)
         else:
-            await asyncio.sleep(purge_time)
+            # Wait the purge_time but check if the lockfile exists every second
+            # and if so, cancel the purge.
+            elapsed = 0.0
+            while True:
+                await asyncio.sleep(1)
+                elapsed += 1
+
+                if elapsed >= purge_time:
+                    break
+
+                check_lockfile()
+
     except asyncio.TimeoutError:
         errored = True
         raise RuntimeError("Maximum purge time reached. Closing valve.")
@@ -322,6 +338,8 @@ async def fill(
 
     """
 
+    check_lockfile()
+
     if check_pressure:
         pressures = await get_pressures()
         for cam in cameras:
@@ -352,7 +370,21 @@ async def fill(
         await on_coro
         await asyncio.sleep(2)
 
-    await asyncio.sleep(fill_time)
+    # Wait the fill_time but check if the lockfile exists every second
+    # and if so, cancel the purge.
+    elapsed = 0.0
+    failed: bool = False
+    while True:
+        await asyncio.sleep(1)
+        elapsed += 1
+
+        if elapsed >= fill_time:
+            break
+
+        if LOCKFILE.exists():
+            write_to_stdout("Lockfile found. Cancelling fill.")
+            failed = True
+            break
 
     if timer_task:
         timer_task.cancel()
@@ -369,6 +401,9 @@ async def fill(
     for off_coro in off_coros:
         await off_coro
         await asyncio.sleep(2)
+
+    if failed:
+        raise RuntimeError("Fill failed.")
 
     write_to_stdout("Fill complete.")
 
@@ -399,6 +434,8 @@ async def purge_and_fill(
         if any of them are above the pressure threshold.
 
     """
+
+    check_lockfile()
 
     if camera_purge_time:
         write_to_stdout("CAMERA PURGE", with_time=False)
@@ -514,6 +551,16 @@ async def get_pressures(print: bool = True):
                     write_to_stdout(f"{camera}{spec_idx}: {pressure}")
 
     return pressures
+
+
+def check_lockfile():
+    """Checks if the lockfile exists and raises an error."""
+
+    if LOCKFILE.exists():
+        raise ValueError(
+            "Lock file found. Fills are not allowd. "
+            "Use ln2fill clear to remove the lock."
+        )
 
 
 def send_email(
@@ -768,8 +815,29 @@ async def purge_cli(purge_time: float | None, check_pressure: bool = True):
 
 
 @ln2fill.command(name="abort")
+@click.option(
+    "--no-lock",
+    is_flag=True,
+    help="Closes all valves but does not lock the fill system.",
+)
 @cli_coro()
-async def abort_cli():
-    """Closes all valves."""
+async def abort_cli(no_lock: bool = True):
+    """Closes all valves and prevents future purges/files."""
 
     await close_all()
+
+    if no_lock is False:
+        write_to_stdout(
+            f"Writing {LOCKFILE!s}. Future purges/fills will be blocked. "
+            "Use ln2fill clear or manually remove the file to clear the lock."
+        )
+
+        LOCKFILE.touch()
+
+
+@ln2fill.command(name="clear")
+@cli_coro()
+async def clear_cli():
+    """Clears the lockfile preventing purges/fills to happen."""
+
+    LOCKFILE.unlink(missing_ok=True)
