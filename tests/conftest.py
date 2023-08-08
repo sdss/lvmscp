@@ -7,11 +7,10 @@ import os
 import pathlib
 
 import pytest as pytest
+from lvmscp.actor import SCPActor
 
 import clu.testing
 from sdsstools import read_yaml_file
-
-from lvmscp.actor import SCPActor
 
 
 @pytest.fixture()

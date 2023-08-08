@@ -46,17 +46,13 @@ jobs:
           python -m pip install --upgrade pip wheel setuptools
           poetry install --without docs --with test
 
-      - name: Lint with flake8
+      - name: Lint with ruff
         run: |
-          poetry run flake8 . --count --show-source --statistics
+          poetry run ruff check .
 
       - name: Lint with black
         run: |
           poetry run black --check .
-
-      - name: Lint with isort
-        run: |
-          poetry run isort -c .
 
       - name: Test with pytest
         env:
