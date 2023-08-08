@@ -558,7 +558,7 @@ def check_lockfile():
 
     if LOCKFILE.exists():
         raise ValueError(
-            "Lock file found. Fills are not allowd. "
+            "Lock file found. Fills are not allowed. "
             "Use ln2fill clear to remove the lock."
         )
 
