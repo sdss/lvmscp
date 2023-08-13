@@ -161,7 +161,13 @@ header:
   TESPECRA: [-999.0, 'Spec telescope initial pointing RA [deg]']
   TESPECDE: [-999.0, 'Spec telescope initial pointing Dec [deg]']
   TESPECAM: [-999.0, 'Spec telescope initial airmass']
-  TESPECFO: [-999.0, 'Sepc focuser position [deg]']
+  TESPECFO: [-999.0, 'Spec focuser position [deg]']
+  POSCIRA: [-999.0, 'Sci target pointing RA [deg]']
+  POSCIDE: [-999.0, 'Sci target pointing Dec [deg]']
+  POSKYERA: [-999.0, 'SkyE target pointing RA [deg]']
+  POSKYEDE: [-999.0, 'SkyE target pointing Dec [deg]']
+  POSKYWRA: [-999.0, 'SkyW target pointing RA [deg]']
+  POSKYWDE: [-999.0, 'SkyW target pointing Dec [deg]']
 
 # This is the ACF configuration file to be loaded to the Archon including the
 # timing script. {archon_etc} gets completed with the path of the etc directory once
