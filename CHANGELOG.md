@@ -1,5 +1,13 @@
 # Changelog
 
+## Next version
+
+### ✨ Improved
+
+* Added tile pointing keywords.
+* Updated `archon` to 0.11.1.
+
+
 ## 0.6.5 - August 11, 2023
 
 ### ✨ Improved
