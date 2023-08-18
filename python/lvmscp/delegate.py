@@ -189,11 +189,12 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         self.command.debug(text="Running exposure post-process.")
 
         now = Time.now()
+        now.location = self.location
 
         for hdu in hdus:
             ccd = str(hdu.header["CCD"])
 
-            hdu.header["LMST"] = now.sidereal_time("mean")
+            hdu.header["LMST"] = round(now.sidereal_time("mean").value, 6)
 
             # Update header with values collected during integration.
             for key in self.header_data:
