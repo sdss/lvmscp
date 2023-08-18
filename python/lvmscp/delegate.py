@@ -253,7 +253,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
             self.command.warning(f"{spec}: failed retrieving hartmann door status.")
 
     async def get_sensors(self, spec: str):
-        """Returns the spectrograph temepratues and RHs."""
+        """Returns the spectrograph temperatures and RHs."""
 
         lvmieb = self.actor.controllers[spec].lvmieb
         cmd = await self.command.send_command(
