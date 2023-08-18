@@ -13,7 +13,10 @@ import asyncio
 from typing import TYPE_CHECKING, Any, List, Literal, Tuple
 
 import numpy
+from astropy.coordinates import EarthLocation
 from astropy.io import fits
+from astropy.time import Time
+from astropy.utils.iers import conf
 
 from archon.actor import ExposureDelegate
 from archon.controller.controller import ArchonController
@@ -24,6 +27,10 @@ if TYPE_CHECKING:
     from clu import Command
 
     from .actor import SCPActor
+
+
+conf.auto_download = False
+conf.iers_degraded_accuracy = "ignore"
 
 
 class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
@@ -41,6 +48,13 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         # Pressure and depth probe data. These data is per CCD/cryostat.
         self.pressure_data: dict[str, float] = {}
         self.depth_data: dict[str, float | str] = {}
+
+        # LCO
+        self.location = EarthLocation.from_geodetic(
+            lon=-70.70166667,
+            lat=-29.00333333,
+            height=2282.0,
+        )
 
     def reset(self):
         self.header_data = {}
@@ -174,8 +188,12 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
 
         self.command.debug(text="Running exposure post-process.")
 
+        now = Time.now()
+
         for hdu in hdus:
             ccd = str(hdu.header["CCD"])
+
+            hdu.header["LMST"] = now.sidereal_time("mean")
 
             # Update header with values collected during integration.
             for key in self.header_data:

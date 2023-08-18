@@ -92,6 +92,7 @@ lamps:
 # cases in which the value is retrieved from an archon command or when the
 # value depends on the CCD name.
 header:
+  LMST: [-999, 'Local mean sidereal time (approximate) [hr]']
   TELESCOP: 'SDSS 0.16m'
   SURVEY: 'LVM'
   CCDTEMP1:
