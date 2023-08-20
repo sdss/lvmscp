@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.7 - August 20, 2023
+
+### ✨ Improved
+
+* Added local mean sidereal time header keyword ``LMST``. Note that the value is computed without updated ``IERS-B`` tables so it may be slightly off.
+
+
 ## 0.6.6 - August 14, 2023
 
 ### ✨ Improved
