@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### ✨ Improved
+
+* Added default header keywords for guider and standards.
+
+
 ## 0.6.7 - August 20, 2023
 
 ### ✨ Improved
