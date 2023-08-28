@@ -22,7 +22,7 @@ from archon.actor.tools import get_schema
 from clu import Command
 from sdsstools import read_yaml_file
 
-from lvmscp import config
+from lvmscp import __version__, config
 from lvmscp.controller import SCPController
 from lvmscp.delegate import LVMExposeDelegate
 
@@ -46,7 +46,7 @@ class SCPActor(ArchonActor):
         # Just for typing.
         self.controllers: dict[str, SCPController]
 
-        super().__init__(*args, schema=schema, **kwargs)
+        super().__init__(*args, schema=schema, version=__version__, **kwargs)
 
         assert self.model
 

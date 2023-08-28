@@ -22,6 +22,8 @@ from archon.actor import ExposureDelegate
 from archon.controller.controller import ArchonController
 from sdsstools.time import get_sjd
 
+from lvmscp import __version__
+
 
 if TYPE_CHECKING:
     from clu import Command
@@ -194,6 +196,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         for hdu in hdus:
             ccd = str(hdu.header["CCD"])
 
+            hdu.header["V_LVMSCP"] = __version__
             hdu.header["LMST"] = round(now.sidereal_time("mean").value, 6)
 
             # Update header with values collected during integration.

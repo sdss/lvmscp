@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### ✨ Improved
+
+* Added `V_LVMSCP` header keyword with `lvmscp` version.
+
+
 ## 0.6.8 - August 24, 2023
 
 ### ✨ Improved
