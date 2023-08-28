@@ -5,6 +5,7 @@
 ### ✨ Improved
 
 * Added `V_LVMSCP` header keyword with `lvmscp` version.
+* Add `SKYENAME` and `SKYWNAME` to header model.
 
 
 ## 0.6.8 - August 24, 2023
