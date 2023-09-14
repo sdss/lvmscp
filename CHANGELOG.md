@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.10 - September 14, 2023
+
+### ✨ Improved
+
+* Updated `archon` to 0.11.2 with a fix for `wait-for-idle`.
+
+
 ## 0.6.9 - August 31, 2023
 
 ### ✨ Improved
