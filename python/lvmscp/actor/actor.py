@@ -205,10 +205,13 @@ class SCPActor(ArchonActor):
         if not self.config.get("write_log", False):
             return
 
+        paths = key.value
+        await asyncio.gather(*[self._fill_log_from_path(path) for path in paths])
+
+    async def _fill_log_from_path(self, path: str):
         if self.google_client is None or "exposure_list" not in self.config:
             return
 
-        path = key.value
         if not os.path.exists(path):
             self.write(
                 "w",
