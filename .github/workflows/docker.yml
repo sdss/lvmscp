@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - sbs
     tags:
       - '*'
     paths-ignore:
