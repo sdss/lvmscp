@@ -238,7 +238,7 @@ class SCPActor(ArchonActor):
         exptime = header["EXPTIME"]
 
         lamp_sources = []
-        for lamp in self.config["lamps"].values():
+        for lamp in self.config["lamps"]:
             if lamp.upper() in header and header[lamp.upper()] == "ON":
                 lamp_sources.append(lamp)
         lamp_sources = " ".join(lamp_sources)
