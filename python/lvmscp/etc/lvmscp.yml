@@ -109,6 +109,9 @@ header:
       r3: ['mod2/tempa', 'Temperature of the sensor (HEATERX 2)', 2]
       b3: ['mod12/tempc', 'Temperature of the sensor (HEATERX 12)', 2]
       z3: ['mod12/tempa', 'Temperature of the sensor (HEATERX 12)', 2]
+      r4: ['mod2/tempa', 'Temperature of the sensor (HEATERX 2)', 2]
+      b4: ['mod12/tempc', 'Temperature of the sensor (HEATERX 12)', 2]
+      z4: ['mod12/tempa', 'Temperature of the sensor (HEATERX 12)', 2]
   CCDTEMP2:
     command: status
     detectors:
@@ -121,6 +124,9 @@ header:
       r3: ['mod2/tempb', 'Temperature of the sensor (HEATERX 2)', 2]
       b3: ['mod2/tempc', 'Temperature of the sensor (HEATERX 12)', 2]
       z3: ['mod12/tempb', 'Temperature of the sensor (HEATERX 12)', 2]
+      r4: ['mod2/tempb', 'Temperature of the sensor (HEATERX 2)', 2]
+      b4: ['mod2/tempc', 'Temperature of the sensor (HEATERX 12)', 2]
+      z4: ['mod12/tempb', 'Temperature of the sensor (HEATERX 12)', 2]
   TRIMSEC1: ['[1:2043, 2041:4080]', 'Data section for quadrant 1']
   TRIMSEC2: ['[2078:4120, 2041:4080]', 'Data section for quadrant 2']
   TRIMSEC3: ['[1:2043, 1:2040]', 'Data section for quadrant 3']
