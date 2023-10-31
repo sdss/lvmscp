@@ -57,6 +57,7 @@ def write_to_stdout(
         message = f"{get_now()}: {message}"
 
     print(message, file=sys.__stdout__)
+    sys.__stdout__.flush()
 
     if write_to_fd and FD is not None:
         print(message, file=FD)
