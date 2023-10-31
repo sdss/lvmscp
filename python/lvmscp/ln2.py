@@ -351,14 +351,14 @@ async def fill(
     else:
         cameras_to_check = cameras
 
-    # pressures = await get_pressures(print=False)
-    # for cam in cameras_to_check:
-    #     pcam = pressures.get(cam, numpy.nan)
-    #     if numpy.isnan(pcam) or pcam > PRESSURE_LIMIT:
-    #         raise RuntimeError(
-    #             "One or more cameras have pressures "
-    #             "above the limit. Aborting the fill."
-    #         )
+    pressures = await get_pressures(print=False)
+    for cam in cameras_to_check:
+        pcam = pressures.get(cam, numpy.nan)
+        if numpy.isnan(pcam) or pcam > PRESSURE_LIMIT:
+            raise RuntimeError(
+                "One or more cameras have pressures "
+                "above the limit. Aborting the fill."
+            )
 
     MAX_TIME = 600
 
