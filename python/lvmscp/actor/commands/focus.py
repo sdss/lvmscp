@@ -55,7 +55,7 @@ async def move_hds(
 
 
 @parser.command()
-@click.argument("SPECTRO", type=click.Choice(["sp1", "sp2", "sp3"]))
+@click.argument("SPECTRO", type=click.Choice(["sp1", "sp2", "sp3", "sp4"]))
 @click.argument("EXPTIME", type=float)
 @click.option("-n", "--count", type=int, default=1, help="Number of focus cycles.")
 @click.option("--dark", flag_value=True, help="Take a dark along each exposure.")
