@@ -39,7 +39,7 @@ async def move_hds(
             command.info(f"Closing {side} Hartmann door(s).")
 
     hd_cmd = await (
-        await command.send_command("lvmieb", f"hartmann {action} -s {side} {spectro}")
+        await command.send_command(f"lvmieb.{spectro}", f"hartmann {action} -s {side}")
     )
 
     if hd_cmd.status.did_fail:
@@ -87,7 +87,8 @@ async def focus(
             # Arc exposure.
             command.info("Taking arc exposure.")
             expose_cmd = await command.send_command(
-                "lvmscp", f"expose --arc -c {spectro} {exptime}"
+                f"lvmscp.{spectro}",
+                f"expose --arc {exptime}",
             )
             await expose_cmd
 
@@ -104,7 +105,8 @@ async def focus(
                 # Dark exposure, if commanded.
                 command.info("Taking dark exposure.")
                 dark_cmd = await command.send_command(
-                    "lvmscp", f"expose --dark -c {spectro} {exptime}"
+                    f"lvmscp.{spectro}",
+                    f"expose --dark -c {spectro} {exptime}",
                 )
                 await dark_cmd
 
