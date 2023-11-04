@@ -330,8 +330,8 @@ archon:
 # or as different HDU extensions inside the FITS file.
 files:
   data_dir: '/data/spectro/lvm'
-  split: true
   template: 'sdR-{hemisphere}-{ccd}-{exposure_no:08d}.fits.gz'
+  write_async: false
 
 checksum:
   write: true
