@@ -31,7 +31,8 @@ if TYPE_CHECKING:
     from .actor import SCPActor
 
 
-conf.auto_download = False
+conf.auto_download = True
+conf.remote_timeout = 10
 conf.iers_degraded_accuracy = "ignore"
 
 
