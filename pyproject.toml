@@ -36,7 +36,10 @@ sdss-archon = "^0.11.2"
 sdss-clu = "^2.1.3"
 
 [tool.poetry.dev-dependencies]
-ipython = ">=7.11.0"
+ipython = [
+    {version = ">=8.0.0", python = ">=3.9,<3.10"},
+    {version = "^8.17.2", python = ">=3.10"}
+]
 flake8 = ">=3.7.9"
 doc8 = ">=0.8.0"
 isort = ">=4.3.21"
