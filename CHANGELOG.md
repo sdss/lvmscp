@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### ✨ Improved
+
+* Use `iers.conf.auto_download = True`. If there is no internet connection the `iers_degraded_accuracy = "ignore"` should not make it fail.
+
+
 ## 0.6.10 - September 14, 2023
 
 ### ✨ Improved
