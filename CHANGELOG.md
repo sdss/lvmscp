@@ -1,6 +1,6 @@
 # Changelog
 
-## Next version
+## 0.6.11 - November 5, 2023
 
 ### ✨ Improved
 
