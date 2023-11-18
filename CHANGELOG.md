@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.12 - November 18, 2023
+
+### ✨ Improved
+
+* Bump `archon` to 0.11.5.
+
+
 ## 0.6.11 - November 5, 2023
 
 ### ✨ Improved
