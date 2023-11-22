@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.13 - November 22, 2023
+
+### ✨ Improved
+
+* Added `CALIBFIB` keyword.
+
+
 ## 0.6.12 - November 18, 2023
 
 ### ✨ Improved

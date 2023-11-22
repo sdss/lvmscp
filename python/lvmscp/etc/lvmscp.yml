@@ -184,6 +184,7 @@ header:
   GSKYEFRN: [null, 'SkyE last guider frame']
   GSKYWFR0: [null, 'SkyW first guider frame']
   GSKYWFRN: [null, 'SkyW last guider frame']
+  CALIBFIB: [null, 'Spec fibre used (only for calibrations)']
   STD1ID: [null, 'Standard 1 Gaia Source ID']
   STD1RA: [null, 'Standard 1 RA']
   STD1DE: [null, 'Standard 1 Dec']
