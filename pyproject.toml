@@ -30,7 +30,7 @@ lvmscp = "lvmscp.__main__:main"
 ln2fill = "lvmscp.ln2:ln2fill"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.12"
+python = ">=3.8,<3.13"
 click-default-group = "^1.2.2"
 sdss-archon = "^0.11.6"
 sdss-clu = "^2.1.3"
