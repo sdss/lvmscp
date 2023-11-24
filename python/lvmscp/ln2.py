@@ -504,15 +504,18 @@ async def outlet_status():
                 spec = purge_spec
 
             actor = f"lvmnps.{spec}"
-            command = await client.send_command(actor, f"status {spec} -o {outlet}")
+            command = await client.send_command(actor, "status")
             if command.status.did_fail:
                 raise RuntimeError("Failed getting outlet status.")
 
-            status = command.replies[-1].body["status"][spec]
-            camera = list(status.keys())[0]
-            state = "off" if status[camera]["state"] == 0 else "on"
+            outlet_data = command.replies[-2].body["outlets"]
+            for oo in outlet_data:
+                if oo["normalised_name"] == outlet:
+                    name = oo["name"]
+                    state = "off" if oo["state"] is False else "on"
+                    write_to_stdout(f"{name}: {state}")
 
-            write_to_stdout(f"{camera}: {state}")
+                    break
 
 
 async def get_ln2_temps():

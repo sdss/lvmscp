@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### 🏷️ Changed
+
+* Modified LN2 code to handle `lvmnps` 1.0.0.
+
+
 ## 0.6.13 - November 22, 2023
 
 ### ✨ Improved
