@@ -2,6 +2,10 @@
 
 ## Next version
 
+### ✨ Improved
+
+* Bump `archon` to 0.11.6.
+
 ### 🏷️ Changed
 
 * Modified LN2 code to handle `lvmnps` 1.0.0.

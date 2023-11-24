@@ -2098,13 +2098,13 @@ files = [
 
 [[package]]
 name = "sdss-archon"
-version = "0.11.5"
+version = "0.11.6"
 description = "A library and actor to communicate with an STA Archon controller."
 optional = false
-python-versions = ">=3.8,<3.12"
+python-versions = ">=3.8,<3.13"
 files = [
-    {file = "sdss_archon-0.11.5-py3-none-any.whl", hash = "sha256:a69f4c1e644f128b96f11af9c0a3df759304e6415dbc765f96f6beff347c15eb"},
-    {file = "sdss_archon-0.11.5.tar.gz", hash = "sha256:73b1e9fa2f28c2b21ebc335bef09d617cdd3617db4c651cef012b55e26fb95b0"},
+    {file = "sdss_archon-0.11.6-py3-none-any.whl", hash = "sha256:7a2e93bb21240ed1f19f818f77dd0f95bd2cdee204a4d25b3c6d7e9471d18300"},
+    {file = "sdss_archon-0.11.6.tar.gz", hash = "sha256:17738bcb3a845bd1fca81dc5e735e4bb6534306f7b73a4166882dd93c700911d"},
 ]
 
 [package.dependencies]
@@ -2543,13 +2543,13 @@ files = [
 
 [[package]]
 name = "unclick"
-version = "0.1.0b5"
+version = "0.1.0"
 description = "A reverse parser for the click CLI library"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "unclick-0.1.0b5-py3-none-any.whl", hash = "sha256:63cfa6e2108c4c8d6c56fa3323b8fd266d890c80f93b5037705a34d9812db02f"},
-    {file = "unclick-0.1.0b5.tar.gz", hash = "sha256:5671f680800554db52298e91b8a7dbd366df435847328459dc6ac22a6189c6c2"},
+    {file = "unclick-0.1.0-py3-none-any.whl", hash = "sha256:9e030b95a74401c9e6e80486595e6e28ddae2a70be44e6c0fe96dcdb932369bd"},
+    {file = "unclick-0.1.0.tar.gz", hash = "sha256:441d74e020e5f8b49d101f5ad15b150eb3cf3f60795ae24317d8ad86f8931a13"},
 ]
 
 [package.dependencies]
@@ -2724,4 +2724,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "b8bb5c2fb8a424724eb840636c8bd3f7bf7473b306403790a8c9831aa76c7849"
+content-hash = "867920e7b32d70b2d9b6cfd7800a81767f50423cfafead7819b0e407a839774d"
