@@ -310,22 +310,17 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         """Retrieves lamp information."""
 
         lvmnps = self.actor.config.get("lvmnps", "lvmnps")
-        cmd = await self.command.send_command(
-            lvmnps,
-            "status",
-            time_limit=10,
-        )
+        cmd = await self.command.send_command(lvmnps, "status", time_limit=10)
 
         # The config file includes the names of the lamps that should be present.
         lamps = self.actor.config.get("lamps", [])
 
         try:
-            status = cmd.replies.get("status")
-            for switch in status:
-                for outlet in status[switch]:
-                    if outlet in lamps:
-                        state = "ON" if status[switch][outlet]["state"] == 1 else "OFF"
-                        self.header_data[outlet.upper()] = state
+            outlets = cmd.replies.get("outlets")
+            for outlet in outlets:
+                if outlet["name"] in lamps:
+                    state = "ON" if outlet["state"] else "OFF"
+                    self.header_data[outlet["name"].upper()] = state
         except Exception as err:
             self.command.warning(f"Failed retrieving lamp status: {err}")
 

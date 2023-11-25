@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### 🔧 Fixed
+
+* Fixed a bug getting the lamp status after switching to the new `lvmnps` actor.
+
+
 ## 0.6.14 - November 24, 2023
 
 ### ✨ Improved
