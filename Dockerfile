@@ -9,7 +9,7 @@ COPY . lvmscp
 
 ENV IS_CONTAINER=yes
 
-RUN apt-get update && apt-get install -y build-essential libbz2-dev zlib zlib1g-dev
+RUN apt-get update && apt-get install -y build-essential libbz2-dev zlib1g-dev
 
 RUN pip3 install -U pip setuptools wheel
 RUN cd lvmscp && pip3 install .
