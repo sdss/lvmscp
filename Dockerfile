@@ -9,6 +9,8 @@ COPY . lvmscp
 
 ENV IS_CONTAINER=yes
 
+RUN apt-get update && apt-get install -y build-essential
+
 RUN pip3 install -U pip setuptools wheel
 RUN cd lvmscp && pip3 install .
 RUN pip3 install fitsio
