@@ -10,7 +10,7 @@ COPY . lvmscp
 ENV IS_CONTAINER=yes
 
 RUN pip3 install -U pip setuptools wheel
-RUN cd lvmscp && pip3 install .
+RUN cd lvmscp && pip3 install .[fitsio]
 RUN rm -Rf lvmscp
 
 ENTRYPOINT lvmscp actor start --debug
