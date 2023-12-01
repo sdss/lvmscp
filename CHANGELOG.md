@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.1 - November 30, 2023
+
+### 🔧 Fixed
+
+* Added `fitsio` to docker image.
+
+
 ## 0.7.0 - November 30, 2023
 
 ### 💥 Breaking changes
