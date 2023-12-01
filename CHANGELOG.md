@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.0 - November 30, 2023
+
+### 💥 Breaking changes
+
+* Support for Python 3.8 has been deprecated.
+
+### ✨ Improved
+
+* Upgraded `archon` to 0.12.0.
+
+
 ## 0.6.15 - November 25, 2023
 
 ### 🔧 Fixed
