@@ -595,6 +595,19 @@ testing = ["covdefaults (>=2.3)", "coverage (>=7.3.2)", "diff-cover (>=8)", "pyt
 typing = ["typing-extensions (>=4.8)"]
 
 [[package]]
+name = "fitsio"
+version = "1.2.1"
+description = "A full featured python library to read from and write to FITS files."
+optional = true
+python-versions = "*"
+files = [
+    {file = "fitsio-1.2.1.tar.gz", hash = "sha256:c64f60588f25fb2ba499854082bca73b0eda43b32ed6091f09dfcbcb72a911a6"},
+]
+
+[package.dependencies]
+numpy = "*"
+
+[[package]]
 name = "flake8"
 version = "6.1.0"
 description = "the modular source code checker: pep8 pyflakes and co"
@@ -2648,7 +2661,10 @@ files = [
 docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (<7.2.5)", "sphinx (>=3.5)", "sphinx-lint"]
 testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-ignore-flaky", "pytest-mypy (>=0.9.1)", "pytest-ruff"]
 
+[extras]
+fitsio = ["fitsio"]
+
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9,<3.13"
-content-hash = "299ff4b8f9b54f9f0e8a91d4b1a03ae94a3955cc2f189aca4c827ffd6aa48ed6"
+content-hash = "cb3815c8df581db56109f532f4b008286db4c85d0823e307b4c0f6d3d6b64175"
