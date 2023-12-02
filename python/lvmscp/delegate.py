@@ -10,22 +10,21 @@ from __future__ import annotations
 
 import asyncio
 
-from typing import TYPE_CHECKING, Any, List, Literal, Tuple
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy
 from astropy.coordinates import EarthLocation
-from astropy.io import fits
 from astropy.time import Time
 from astropy.utils.iers import conf
 
 from archon.actor import ExposureDelegate
-from archon.controller.controller import ArchonController
 from sdsstools.time import get_sjd
 
 from lvmscp import __version__
 
 
 if TYPE_CHECKING:
+    from archon.actor.delegate import FetchDataDict
     from clu import Command
 
     from .actor import SCPActor
@@ -182,40 +181,31 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
 
         return
 
-    async def post_process(
-        self,
-        controller: ArchonController,
-        hdus: List[fits.PrimaryHDU],
-    ) -> Tuple[ArchonController, List[fits.PrimaryHDU]]:
+    async def post_process(self, fdata: FetchDataDict):
         """Post-process images."""
 
-        self.command.debug(text="Running exposure post-process.")
+        ccd = fdata["ccd"]
+        self.command.debug(text=f"Running exposure post-process for CCD {ccd}.")
 
         now = Time.now()
         now.location = self.location
 
-        for hdu in hdus:
-            ccd = str(hdu["header"]["CCD"])
+        header = fdata["header"]
+        header["V_LVMSCP"][0] = __version__
+        header["LMST"][0] = round(now.sidereal_time("mean").value, 6)
 
-            hdu["header"]["V_LVMSCP"][0] = __version__
-            hdu["header"]["LMST"][0] = round(now.sidereal_time("mean").value, 6)
+        # Update header with values collected during integration.
+        for key in self.header_data:
+            header[key][0] = self.header_data[key]
 
-            # Update header with values collected during integration.
-            for key in self.header_data:
-                hdu["header"][key][0] = self.header_data[key]
+        # Add SDSS MJD.
+        header["SMJD"][0] = get_sjd("LCO")
+        header["PRESSURE"][0] = self.pressure_data.get(f"{ccd}_pressure", -999.0)
 
-            # Add SDSS MJD.
-            hdu["header"]["SMJD"][0] = get_sjd("LCO")
-            hdu["header"]["PRESSURE"][0] = self.pressure_data.get(
-                f"{ccd}_pressure", -999.0
-            )
-
-            depth_camera = self.depth_data.get("camera", "")
-            for ch in ["A", "B", "C"]:
-                depth = self.depth_data[ch] if ccd == depth_camera else -999.0
-                hdu["header"][f"DEPTH{ch}"][0] = depth
-
-        return (controller, hdus)
+        depth_camera = self.depth_data.get("camera", "")
+        for ch in ["A", "B", "C"]:
+            depth = self.depth_data[ch] if ccd == depth_camera else -999.0
+            header[f"DEPTH{ch}"][0] = depth
 
     async def get_shutter_status(self, spec: str) -> dict | Literal[False]:
         """Returns the status of the shutter for a spectrograph."""

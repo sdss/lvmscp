@@ -17,6 +17,7 @@ classifiers = [
 	"Programming Language :: Python :: 3.9",
 	"Programming Language :: Python :: 3.10",
 	"Programming Language :: Python :: 3.11",
+	"Programming Language :: Python :: 3.12",
     "Topic :: Documentation :: Sphinx",
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
@@ -74,13 +75,14 @@ sphinx-click = ">=3.0.1"
 
 [tool.black]
 line-length = 88
-target-version = ['py311']
+target-version = ['py312']
 fast = true
 
 [tool.ruff]
 line-length = 88
-target-version = 'py311'
+target-version = 'py312'
 select = ["E", "F", "I"]
+exclude = ["**/*.pyi"]
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F403", "F401", "E402"]
