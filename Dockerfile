@@ -12,8 +12,7 @@ ENV IS_CONTAINER=yes
 RUN apt-get update && apt-get install -y build-essential libbz2-dev zlib1g-dev
 
 RUN pip3 install -U pip setuptools wheel
-RUN cd lvmscp && pip3 install .
-RUN pip3 install fitsio
+RUN cd lvmscp && pip3 install .[fitsio]
 RUN rm -Rf lvmscp
 
 ENTRYPOINT lvmscp actor start --debug
