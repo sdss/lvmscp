@@ -37,10 +37,10 @@ def delegate(actor: SCPActor, monkeypatch, tmp_path: pathlib.Path, mocker):
         return_value=(numpy.ones((2048, 6144)), 1),
     )
 
-    mocker.patch.object(actor.expose_delegate, "get_telescope_info", return_value={})
+    mocker.patch.object(actor.exposure_delegate, "get_telescope_info", return_value={})
 
     mocker.patch.object(
-        actor.expose_delegate,
+        actor.exposure_delegate,
         "_get_ccd_data",
         return_value=numpy.zeros((100, 100)),
     )
@@ -63,9 +63,9 @@ def delegate(actor: SCPActor, monkeypatch, tmp_path: pathlib.Path, mocker):
 
     monkeypatch.setitem(actor.config["files"], "data_dir", str(files_data_dir))
 
-    actor.expose_delegate.reset()
+    actor.exposure_delegate.reset()
 
-    yield actor.expose_delegate
+    yield actor.exposure_delegate
 
 
 async def send_command_handler(actor: str, command_string: str, **kwargs):
@@ -115,7 +115,7 @@ async def command(delegate: LVMExposeDelegate, mocker):
 
 
 async def test_delegate(delegate: LVMExposeDelegate, actor: SCPActor):
-    assert actor.expose_delegate == delegate
+    assert actor.exposure_delegate == delegate
 
 
 @pytest.mark.parametrize("flavour", ["bias", "dark", "object"])

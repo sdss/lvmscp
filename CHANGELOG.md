@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### ✨ Improved
+
+* [#24](https://github.com/sdss/lvmscp/pull/24) Support `archon` 0.13.x.
+
+
 ## 0.7.1 - November 30, 2023
 
 ### 🔧 Fixed
