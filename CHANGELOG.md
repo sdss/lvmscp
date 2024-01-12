@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### 🏷️ Changed
+
+* Disable download of IERS tables. Updated `astropy-iers-data`.
+
+
 ## 0.8.0 - December 2, 2023
 
 ### ✨ Improved
