@@ -199,12 +199,20 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
 
         # Add SDSS MJD.
         header["SMJD"][0] = get_sjd("LCO")
-        header["PRESSURE"][0] = self.pressure_data.get(f"{ccd}_pressure", -999.0)
+        header["PRESSURE"][0] = self.pressure_data.get(f"{ccd}_pressure", numpy.nan)
 
         depth_camera = self.depth_data.get("camera", "")
         for ch in ["A", "B", "C"]:
-            depth = self.depth_data[ch] if ccd == depth_camera else -999.0
+            depth = self.depth_data[ch] if ccd == depth_camera else numpy.nan
             header[f"DEPTH{ch}"][0] = depth
+
+        # Replace NaNs in headers. FITS does not support NaNs.
+        for key, value in header.items():
+            try:
+                if numpy.isnan(value[0]):
+                    header[key][0] = None
+            except Exception:
+                continue
 
     async def get_shutter_status(self, spec: str) -> dict | Literal[False]:
         """Returns the status of the shutter for a spectrograph."""
@@ -260,8 +268,8 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
 
         try:
             sensors = cmd.replies.get(f"{spec}_sensors")
-            self.header_data["LABTEMP"] = sensors.get("t3", -999.0)
-            self.header_data["LABHUMID"] = sensors.get("rh3", -999.0)
+            self.header_data["LABTEMP"] = sensors.get("t3", numpy.nan)
+            self.header_data["LABHUMID"] = sensors.get("rh3", numpy.nan)
         except KeyError:
             self.command.warning(f"{spec}: failed retrieving sensor values.")
 
@@ -332,14 +340,14 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
             else:
                 pwi_status = pwi_cmd.replies[-1].body
 
-                ra_h: float = pwi_status.get("ra_j2000_hours", -999.0)
+                ra_h: float = pwi_status.get("ra_j2000_hours", numpy.nan)
                 if ra_h > 0:
                     ra_d = ra_h * 15.0
                 else:
                     ra_d = ra_h
                 self.header_data[f"TE{telescope.upper()}RA"] = numpy.round(ra_d, 6)
 
-                dec = pwi_status.get("dec_j2000_degs", -999.0)
+                dec = pwi_status.get("dec_j2000_degs", numpy.nan)
                 self.header_data[f"TE{telescope.upper()}DE"] = numpy.round(dec, 6)
 
                 alt = pwi_status.get("altitude_degs", None)
