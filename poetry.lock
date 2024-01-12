@@ -2038,13 +2038,13 @@ files = [
 
 [[package]]
 name = "sdss-archon"
-version = "0.13.2"
+version = "0.13.3"
 description = "A library and actor to communicate with an STA Archon controller."
 optional = false
 python-versions = ">=3.9,<3.13"
 files = [
-    {file = "sdss_archon-0.13.2-py3-none-any.whl", hash = "sha256:619b14e6dd149a9cb5b470faeb97f212ffb5a3eeb1711d6f8a80ab6315f83adc"},
-    {file = "sdss_archon-0.13.2.tar.gz", hash = "sha256:612c326dfc2d25b21b013951b118589fae57b26c4afd9a8f0862d98739a1d30b"},
+    {file = "sdss_archon-0.13.3-py3-none-any.whl", hash = "sha256:dc3db746699df652f5e106f4cb6781a08e7a05cdc37e432f84bf8049765bcb07"},
+    {file = "sdss_archon-0.13.3.tar.gz", hash = "sha256:2e7f9a8d15faea7422e4218f0c8fa1e452b1522eb0bfd4352e0b8963f57a9e02"},
 ]
 
 [package.dependencies]
