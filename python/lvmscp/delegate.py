@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy
 from astropy.coordinates import EarthLocation
 from astropy.time import Time
+from astropy.utils import iers
 from astropy.utils.iers import conf
 
 from archon.actor import ExposureDelegate
@@ -32,6 +33,10 @@ if TYPE_CHECKING:
 
 conf.auto_download = False
 conf.iers_degraded_accuracy = "ignore"
+
+# See https://github.com/astropy/astropy/issues/15881
+iers_a = iers.IERS_A.open(iers.IERS_A_FILE)
+iers.earth_orientation_table.set(iers_a)
 
 
 class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
