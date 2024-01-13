@@ -2,6 +2,10 @@
 
 ## Next version
 
+### ✨ Improved
+
+* Cast NaNs in header to nulls.
+
 ### 🏷️ Changed
 
 * Disable download of IERS tables. Updated `astropy-iers-data`.
