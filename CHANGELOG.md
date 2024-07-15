@@ -2,6 +2,10 @@
 
 ## Next version
 
+### ✨ Improved
+
+* Bumped `archon` to 0.14.0.
+
 ### ⚙️ Engineering
 
 * Format code using `ruff`.
