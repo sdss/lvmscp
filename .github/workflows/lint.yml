@@ -1,0 +1,37 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - '**.rst'
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - '**.rst'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    env:
+      OBSERVATORY: LCO
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+          cache: 'pip'
+
+      - name: Lint with ruff
+        run: |
+          pip install ruff
+          ruff check python/ tests/
+          ruff format --check python/ tests/
