@@ -2,6 +2,10 @@
 
 ## Next version
 
+### 🔥 Breaking changes
+
+* Dropped support for Python 3.9.
+
 ### ✨ Improved
 
 * Bumped `archon` to 0.14.0.
