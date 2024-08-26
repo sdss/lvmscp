@@ -45,6 +45,7 @@ class SCPActor(ArchonActor):
 
         # Just for typing.
         self.controllers: dict[str, SCPController]
+        self.exposure_delegate: LVMExposeDelegate
 
         super().__init__(*args, schema=schema, version=__version__, **kwargs)
 
