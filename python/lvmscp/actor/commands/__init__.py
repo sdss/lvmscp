@@ -10,5 +10,6 @@ from __future__ import annotations
 
 from archon.actor.commands import parser
 
+from .etr import get_etr
 from .focus import focus
 from .hardware_status import hardware_status

@@ -42,9 +42,7 @@ fitsio = ["fitsio"]
 
 [tool.poetry.dev-dependencies]
 ipython = ">=8.17.2"
-flake8 = ">=3.7.9"
 doc8 = ">=0.8.0"
-isort = ">=4.3.21"
 ipdb = ">=0.12.3"
 rstcheck = ">=3.3.1"
 ruff = ">=0.5.1"
@@ -62,11 +60,6 @@ nox = ">=2021.6.12"
 sphinx-autobuild = ">=2021.3.14"
 sphinx-copybutton = ">=0.3.3"
 sphinx-click = ">=3.0.1"
-
-[tool.black]
-line-length = 88
-target-version = ['py312']
-fast = true
 
 [tool.ruff]
 line-length = 88

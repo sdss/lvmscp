@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import asyncio
+import time
 
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -19,6 +20,7 @@ from astropy.utils import iers
 from astropy.utils.iers import conf
 
 from archon.actor import ExposureDelegate
+from archon.controller import ControllerStatus
 from sdsstools.time import get_sjd
 
 from lvmscp import __version__
@@ -37,6 +39,9 @@ conf.iers_degraded_accuracy = "ignore"
 # See https://github.com/astropy/astropy/issues/15881
 iers_a = iers.IERS_A.open(iers.IERS_A_FILE)
 iers.earth_orientation_table.set(iers_a)
+
+
+EXPECTED_READOUT_TIME: float = 55
 
 
 class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
@@ -384,3 +389,39 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
             else:
                 foc_position = numpy.round(foc_cmd.replies.get("Position"), 2)
                 self.header_data[f"TE{telescope.upper()}FO"] = foc_position
+
+    def get_etr(self):
+        """Returns the estimated time remaining including readout, or null if idle."""
+
+        edata = self.expose_data
+        readout_time = EXPECTED_READOUT_TIME
+
+        if edata is None or edata.controllers is None:
+            return None
+
+        IDLE = ControllerStatus.IDLE
+        EXPOSING = ControllerStatus.EXPOSING
+        READING = ControllerStatus.READING
+        PENDING = ControllerStatus.READOUT_PENDING
+
+        status = [c.status for c in edata.controllers]
+        if all([s & IDLE for s in status]) and not any([s & PENDING for s in status]):
+            return None
+
+        if edata.start_time is None:
+            return None
+
+        if all([s & EXPOSING for s in status]):
+            start_time = edata.start_time.unix
+            elapsed = time.time() - start_time
+            return round(max(0, edata.exposure_time - elapsed + readout_time), 1)
+
+        if all([s & PENDING for s in status]):
+            return readout_time
+
+        if any([s & READING for s in status]) and edata.end_time:
+            end_time = edata.end_time.unix
+            elapsed = time.time() - end_time
+            return round(max(0, readout_time - elapsed), 1)
+
+        return None
