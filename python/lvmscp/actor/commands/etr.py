@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 @parser.command()
-async def get_etr(command: CommandType):
+async def get_etr(command: CommandType, *_):
     """Gets the ETR of the exposure."""
 
     delegate = command.actor.exposure_delegate

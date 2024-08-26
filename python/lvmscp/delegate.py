@@ -399,22 +399,27 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         if edata is None or edata.controllers is None:
             return None
 
+        IDLE = ControllerStatus.IDLE
+        EXPOSING = ControllerStatus.EXPOSING
+        READING = ControllerStatus.READING
+        PENDING = ControllerStatus.READOUT_PENDING
+
         status = [c.status for c in edata.controllers]
-        if all([s & ControllerStatus.IDLE for s in status]):
+        if all([s & IDLE for s in status]) and not any([s & PENDING for s in status]):
             return None
 
         if edata.start_time is None:
             return None
 
-        if all([s & ControllerStatus.EXPOSING for s in status]):
+        if all([s & EXPOSING for s in status]):
             start_time = edata.start_time.unix
             elapsed = time.time() - start_time
             return round(max(0, edata.exposure_time - elapsed + readout_time), 1)
 
-        if all([s & ControllerStatus.READOUT_PENDING for s in status]):
+        if all([s & PENDING for s in status]):
             return readout_time
 
-        if any([s & ControllerStatus.READING for s in status]) and edata.end_time:
+        if any([s & READING for s in status]) and edata.end_time:
             end_time = edata.end_time.unix
             elapsed = time.time() - end_time
             return round(max(0, readout_time - elapsed), 1)
