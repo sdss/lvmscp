@@ -29,7 +29,8 @@ async def get_etr(command: CommandType, *_):
 
     if etr is None or e_data is None:
         command.warning("ETR not available. The controllers may be idle.")
+        total_time = None
+    else:
+        total_time = e_data.exposure_time + EXPECTED_READOUT_TIME
 
-    assert e_data
-
-    command.finish(etr=[etr, e_data.exposure_time + EXPECTED_READOUT_TIME])
+    command.finish(etr=[etr, total_time])
