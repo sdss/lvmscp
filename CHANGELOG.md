@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### 🚀 Added
+
+* [#25](https://github.com/sdss/lvmscp/pull/25) Added new command `get-etr` which returns the estimated remaining time for the exposure including readout.
+
+
 ## 0.9.0 - July 14, 2024
 
 ### 🔥 Breaking changes
