@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from lvmscp.delegate import EXPECTED_READOUT_TIME
+
 from . import parser
 
 
@@ -22,9 +24,12 @@ async def get_etr(command: CommandType, *_):
     """Gets the ETR of the exposure."""
 
     delegate = command.actor.exposure_delegate
+    e_data = delegate.expose_data
     etr = delegate.get_etr()
 
-    if etr is None:
+    if etr is None or e_data is None:
         command.warning("ETR not available. The controllers may be idle.")
 
-    command.finish(etr=etr)
+    assert e_data
+
+    command.finish(etr=[etr, e_data.exposure_time + EXPECTED_READOUT_TIME])
