@@ -6,6 +6,10 @@
 
 * Removed the now deprecated LN2 code.
 
+### ✨ Improved
+
+* Updated `archon` to 0.15.0 with a fix for `wait-for-idle`.
+
 ### ⚙️ Engineering
 
 * Migrate to using `uv` for packaging.
