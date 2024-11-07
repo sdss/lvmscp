@@ -14,7 +14,6 @@ import os
 
 import click
 from click_default_group import DefaultGroup
-
 from sdsstools.daemonizer import DaemonGroup
 
 from lvmscp.actor import SCPActor
