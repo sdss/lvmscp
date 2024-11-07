@@ -2,6 +2,10 @@
 
 ## Next version
 
+### 🔥 Breaking changes
+
+* Removed the now deprecated LN2 code.
+
 ### ⚙️ Engineering
 
 * Migrate to using `uv` for packaging.
