@@ -1,7 +1,7 @@
 FROM python:3.11-slim-bullseye
 
-MAINTAINER Jose Sanchez-Gallego, gallegoj@uw.edu
-LABEL org.opencontainers.image.source https://github.com/sdss/lvmscp
+LABEL org.opencontainers.image.authors="Jose Sanchez-Gallego, gallegoj@uw.edu"
+LABEL org.opencontainers.image.source=https://github.com/sdss/lvmscp
 
 WORKDIR /opt
 
@@ -15,4 +15,4 @@ RUN pip3 install -U pip setuptools wheel
 RUN cd lvmscp && pip3 install .[fitsio]
 RUN rm -Rf lvmscp
 
-ENTRYPOINT lvmscp actor start --debug
+ENTRYPOINT ["lvmscp", "actor", "start", "--debug"]
