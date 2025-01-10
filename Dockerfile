@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bullseye
+FROM ghcr.io/astral-sh/uv:latest-python3.13-bookworm-slim
 
 LABEL org.opencontainers.image.authors="Jose Sanchez-Gallego, gallegoj@uw.edu"
 LABEL org.opencontainers.image.source=https://github.com/sdss/lvmscp
@@ -9,10 +9,18 @@ COPY . lvmscp
 
 ENV IS_CONTAINER=yes
 
-RUN apt-get update && apt-get install -y build-essential libbz2-dev zlib1g-dev
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
 
-RUN pip3 install -U pip setuptools wheel
-RUN cd lvmscp && pip3 install .[fitsio]
-RUN rm -Rf lvmscp
+ENV PATH="$PATH:/opt/lvmscp/.venv/bin"
+
+RUN apt-get update && apt-get install -y build-essential libbz2-dev zlib1g-dev
+RUN apt-get install -y git
+
+# Sync the project
+RUN cd lvmscp && uv sync --frozen --no-cache --extras fitsio
+
+# Remove unused packages
+RUN apt-get remove -y git && apt-get autoremove -y
 
 ENTRYPOINT ["lvmscp", "actor", "start", "--debug"]
