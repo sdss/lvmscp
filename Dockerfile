@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y build-essential libbz2-dev zlib1g-dev
 RUN apt-get install -y git
 
 # Sync the project
-RUN cd lvmscp && uv sync --frozen --no-cache --extras fitsio
+RUN cd lvmscp && uv sync --frozen --no-cache --extra fitsio
 
 # Remove unused packages
 RUN apt-get remove -y git && apt-get autoremove -y
