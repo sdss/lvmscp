@@ -73,7 +73,7 @@ async def focus(
 
     for n in range(count):
         if count != 1:
-            command.info(f"Focus iteration {n+1} out of {count}.")
+            command.info(f"Focus iteration {n + 1} out of {count}.")
 
         for side in ["left", "right"]:
             # Open both HDs.
