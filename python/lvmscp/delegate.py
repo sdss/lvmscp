@@ -93,13 +93,15 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
             results = await asyncio.gather(*jobs_status)
             for result in results:
                 if result is False:
-                    return self.fail("Failed getting shutter status.")
+                    return await self.fail("Failed getting shutter status.")
                 if result["invalid"] or result["open"]:
-                    return self.fail("Some shutters are in an invalid stated or open.")
+                    return await self.fail(
+                        "Some shutters are in an invalid stated or left open."
+                    )
 
         return True
 
-    async def shutter(self, open, is_retry=False):
+    async def shutter(self, open, is_retry=False):  # type: ignore
         """Operate the shutter."""
 
         if not self.use_shutter:

@@ -53,6 +53,9 @@ test = [
     "coverage[toml]>=5.0"
 ]
 
+[tool.uv.sources]
+sdss-archon = { git = "https://github.com/sdss/archon", branch = "main" }
+
 [tool.ruff]
 line-length = 88
 target-version = 'py312'
