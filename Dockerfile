@@ -23,4 +23,4 @@ RUN cd lvmscp && uv sync --frozen --no-cache --extra fitsio
 # Remove unused packages
 RUN apt-get remove -y git && apt-get autoremove -y
 
-ENTRYPOINT ["lvmscp", "actor", "start", "--debug"]
+ENTRYPOINT ["/opt/lvmscp/.venv/bin/lvmscp", "actor", "start", "--debug"]
