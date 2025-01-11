@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.10.1 - January 11, 2025
+
+### 🔧 Fixed
+
+* Updated `archon` to [0.15.1](https://github.com/sdss/archon/releases/tag/0.15.1) to fix an issue in which a previously aborted exposure could affect the following one.
+
+### ⚙️ Engineering
+
+* Updated workflows and Dockerfile to use `uv` more efficiently.
+
+
 ## 0.10.0 - November 7, 2024
 
 ### 🔥 Breaking changes
