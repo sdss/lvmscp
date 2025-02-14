@@ -83,7 +83,7 @@ typeCheckingMode = "standard"
 [tool.pytest.ini_options]
 addopts = "--cov lvmscp --cov-report xml --cov-report html --cov-report term"
 asyncio_mode = "auto"
-syncio_default_fixture_loop_scope = "function"
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.coverage.run]
 branch = true
