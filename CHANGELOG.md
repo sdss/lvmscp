@@ -1,10 +1,14 @@
 # Changelog
 
-## Next version
+## 0.10.2 - February 14, 2025
 
 ### ✨ Improved
 
 * Added keyword `TEMPSCI` with the temperature outside the science telescope optical bench.
+
+### 🔧 Fixed
+
+* Fixed a typo in the `asyncio_default_fixture_loop_scope` configuration value in `pyproject.toml`.
 
 
 ## 0.10.1 - January 11, 2025
