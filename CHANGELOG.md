@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### ✨ Improved
+
+* Added keyword `TEMPSCI` with the temperature outside the science telescope optical bench.
+
+
 ## 0.10.1 - January 11, 2025
 
 ### 🔧 Fixed

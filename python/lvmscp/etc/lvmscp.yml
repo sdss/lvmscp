@@ -143,6 +143,7 @@ header:
   PRESSURE: [null, 'Cryostat pressure [torr]']
   LABTEMP: [null, 'Lab temperature [C]']
   LABHUMID: [null, 'Lab relative humidity [%]']
+  TEMPSCI: [null, 'Temperature outside the science telescope [C]']
   DEPTHA: [null, 'Depth probe A [mm]']
   DEPTHB: [null, 'Depth probe B [mm]']
   DEPTHC: [null, 'Depth probe C [mm]']

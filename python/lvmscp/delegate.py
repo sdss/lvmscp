@@ -182,6 +182,7 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         tasks = [
             self.get_hartmann_status(controller.name),
             self.get_sensors(controller.name),
+            self.get_bench_temperature(),
             self.get_lamps(),
             self.get_pressure(controller.name),
             self.read_depth_probes(),
@@ -284,6 +285,21 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
             self.header_data["LABHUMID"] = sensors.get("rh3", numpy.nan)
         except KeyError:
             self.command.warning(f"{spec}: failed retrieving sensor values.")
+
+    async def get_bench_temperature(self):
+        """Gets the science telescope bench temperature."""
+
+        cmd = await self.command.send_command(
+            "lvm.sci.telemetry",
+            "status",
+            time_limit=5,
+        )
+
+        try:
+            sensor2 = cmd.replies.get("sensor2")
+            self.header_data["TEMPSCI"] = sensor2["temperature"]
+        except KeyError:
+            self.command.warning("Failed retrieving bench temperature.")
 
     async def get_pressure(self, spec: str):
         """Returns the cryostat pressures."""
