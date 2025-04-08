@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+### ✨ Improved
+
+* Updated `archon` to `0.15.2` with a fix for header keyword comment disappearing when an extra header was passed.
+
+
 ## 0.10.2 - February 14, 2025
 
 ### ✨ Improved
