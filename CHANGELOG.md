@@ -1,10 +1,11 @@
 # Changelog
 
-## Next version
+## 0.10.3 - April 8, 2025
 
 ### ✨ Improved
 
 * Updated `archon` to `0.15.2` with a fix for header keyword comment disappearing when an extra header was passed.
+* Add `IMPRECISE` to the `TE*RA/DEC` keywords.
 
 
 ## 0.10.2 - February 14, 2025
