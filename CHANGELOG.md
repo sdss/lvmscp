@@ -5,6 +5,7 @@
 ### ✨ Improved
 
 * Updated `archon` to `0.15.3`.
+* Changed how the periodic status command is sent to the actor.
 
 
 ## 0.10.3 - April 8, 2025

@@ -79,13 +79,14 @@ class SCPActor(ArchonActor):
         await asyncio.sleep(5)
 
         while True:
-            await Command(
+            command = await self.send_command(
+                self.name,
                 "status",
-                actor=self,
-                commander_id=f".{self.name}",
                 internal=True,
-                write_to_log=False,
-            ).parse()
+                await_command=False,
+            )
+            command.write_to_log = False
+            await command
 
             await asyncio.sleep(delay)
 
