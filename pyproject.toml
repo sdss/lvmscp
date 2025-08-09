@@ -12,7 +12,7 @@ requires-python = ">=3.10,<4"
 
 dependencies = [
     "sdss-archon>=0.15.3",
-    "sdss-clu>=2.5.1"
+    "sdss-clu>=2.5.2"
 ]
 
 [project.optional-dependencies]
