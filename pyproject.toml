@@ -11,7 +11,8 @@ readme = "README.md"
 requires-python = ">=3.10,<4"
 
 dependencies = [
-    "sdss-archon>=0.15.3"
+    "sdss-archon>=0.15.3",
+    "sdss-clu>=2.5.1"
 ]
 
 [project.optional-dependencies]

@@ -1895,7 +1895,7 @@ wheels = [
 
 [[package]]
 name = "sdss-clu"
-version = "2.5.0"
+version = "2.5.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aio-pika" },
@@ -1909,9 +1909,9 @@ dependencies = [
     { name = "sdsstools" },
     { name = "unclick" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/19/28/a81ba6561598a85c5987156d2a806516caae76a985de90dea77c3ca03cb1/sdss_clu-2.5.0.tar.gz", hash = "sha256:9514816e3b79e201ba511c9dc902afae54a781f105c62bfa4b04c6b88474823a", size = 123793, upload-time = "2025-08-07T20:09:03.363Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bf/35/8ea05c831352d53ec136e1733a6de8ec267258440ff5673931cdbdab2e51/sdss_clu-2.5.1.tar.gz", hash = "sha256:88ee79808b9fcb07ec1feb4cca113ac353c1da9c286720429431a3296751cb3d", size = 123878, upload-time = "2025-08-09T16:40:40.593Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/62/89/7601e3b6ce54e1ebcf1628cad7d6749cb64b7e73b5410ca900cb6b7a527c/sdss_clu-2.5.0-py3-none-any.whl", hash = "sha256:c017f1f07b16dab04e3b979d398ee4d4fcab93e0c3c23d00488afb3f6259f840", size = 143126, upload-time = "2025-08-07T20:09:00.954Z" },
+    { url = "https://files.pythonhosted.org/packages/e1/4c/0fcddcc386ac129f37b5b6adf2cf14a24d737307f11e5072c729781ba48c/sdss_clu-2.5.1-py3-none-any.whl", hash = "sha256:e8671fdc31dbb8fa458191c3b3aa2e124aeacb5122428b95ac719ae1fc1e65ca", size = 143101, upload-time = "2025-08-09T16:40:38.977Z" },
 ]
 
 [[package]]
@@ -1920,6 +1920,7 @@ version = "0.10.4a0"
 source = { editable = "." }
 dependencies = [
     { name = "sdss-archon" },
+    { name = "sdss-clu" },
 ]
 
 [package.optional-dependencies]
@@ -1962,6 +1963,7 @@ test = [
 requires-dist = [
     { name = "fitsio", marker = "extra == 'fitsio'", specifier = ">=1.2.2" },
     { name = "sdss-archon", specifier = ">=0.15.3" },
+    { name = "sdss-clu", specifier = ">=2.5.1" },
 ]
 provides-extras = ["fitsio"]
 
