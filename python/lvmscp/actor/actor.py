@@ -53,7 +53,7 @@ class SCPActor(ArchonActor):
 
         self.emit_status_task: asyncio.Task | None = None
 
-    async def start(self):
+    async def start(self, **_):
         """Starts the actor."""
 
         start_result = await super().start()
