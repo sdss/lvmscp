@@ -1877,7 +1877,7 @@ wheels = [
 
 [[package]]
 name = "sdss-archon"
-version = "0.15.3"
+version = "0.15.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "astropy", version = "6.1.7", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
@@ -1888,9 +1888,9 @@ dependencies = [
     { name = "sdss-clu" },
     { name = "sdsstools" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ff/83/0585eec280468752c31c44e943b0e3f08e465f34e83ed032c67d28013261/sdss_archon-0.15.3.tar.gz", hash = "sha256:ad4e1b00c577c2a5f1e4cd12afc432506c3b3d912ad2925f4e18ae5df10275bd", size = 44529, upload-time = "2025-08-09T15:20:37.764Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ad/b8/919972e45f9f1467e9af92758907c90b9841d811e723abeff612ccde4ec0/sdss_archon-0.15.4.tar.gz", hash = "sha256:f6f775c162b2d50d037a22b209857487b84c3b4da5e5bcfdc483204a398eb233", size = 44544, upload-time = "2025-08-10T15:17:55.024Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cb/62/53196a012a7ee01760b3bfd868be936f5a58123a21ed9a38580029bde819/sdss_archon-0.15.3-py3-none-any.whl", hash = "sha256:5b5f6e33b0ca51999006a57a3562d5d000dca3e56b117bab13bf4783f35b42d6", size = 59628, upload-time = "2025-08-09T15:20:36.248Z" },
+    { url = "https://files.pythonhosted.org/packages/df/db/24c7d44167e2251ccaf3f1f8d55e9cefb77ad653f6dcdc2e35635dd038d6/sdss_archon-0.15.4-py3-none-any.whl", hash = "sha256:39a1b3eaca30a43ef528f532a2b85b13e37601dd9abd7df2f6228db4c2e1c1b1", size = 59663, upload-time = "2025-08-10T15:17:53.879Z" },
 ]
 
 [[package]]
@@ -1962,7 +1962,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "fitsio", marker = "extra == 'fitsio'", specifier = ">=1.2.2" },
-    { name = "sdss-archon", specifier = ">=0.15.3" },
+    { name = "sdss-archon", specifier = ">=0.15.4" },
     { name = "sdss-clu", specifier = ">=2.5.2" },
 ]
 provides-extras = ["fitsio"]

@@ -1,5 +1,12 @@
 # Changelog
 
+## Next release
+
+### ✨ Improved
+
+* Updated `archon` to `0.15.4`.
+
+
 ## 0.10.4 - August 9, 2025
 
 ### ✨ Improved
