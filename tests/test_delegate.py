@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture()
-def delegate(actor: SCPActor, monkeypatch, tmp_path: pathlib.Path, mocker):
+async def delegate(actor: SCPActor, monkeypatch, tmp_path: pathlib.Path, mocker):
     mocker.patch.object(actor.controllers["sp1"], "set_window")
     mocker.patch.object(actor.controllers["sp1"], "expose")
     mocker.patch.object(actor.controllers["sp1"], "readout")
@@ -63,7 +63,7 @@ def delegate(actor: SCPActor, monkeypatch, tmp_path: pathlib.Path, mocker):
 
     monkeypatch.setitem(actor.config["files"], "data_dir", str(files_data_dir))
 
-    actor.exposure_delegate.reset()
+    await actor.exposure_delegate.reset()
 
     yield actor.exposure_delegate
 
