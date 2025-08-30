@@ -199,12 +199,12 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
         ccd = fdata["ccd"]
         self.command.debug(text=f"Running exposure post-process for CCD {ccd}.")
 
-        now = Time.now()
-        now.location = self.location
-
         header = fdata["header"]
         header["V_LVMSCP"][0] = __version__
-        header["LMST"][0] = round(now.sidereal_time("mean").value, 6)
+
+        now = Time.now()
+        sideral_time = now.sidereal_time("mean", longitude=self.location).value
+        header["LMST"][0] = round(sideral_time, 6)
 
         # Update header with values collected during integration.
         for key in self.header_data:
