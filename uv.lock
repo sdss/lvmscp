@@ -1908,7 +1908,7 @@ version = "0.10.7a1"
 source = { editable = "." }
 dependencies = [
     { name = "sdss-archon" },
-    { name = "sdss-clu" },
+    { name = "sdsstools" },
 ]
 
 [package.optional-dependencies]
@@ -1952,7 +1952,7 @@ test = [
 requires-dist = [
     { name = "fitsio", marker = "extra == 'fitsio'", specifier = ">=1.2.2" },
     { name = "sdss-archon", specifier = ">=0.15.5" },
-    { name = "sdss-clu", specifier = ">=2.5.2" },
+    { name = "sdsstools", specifier = ">=1.9.2" },
 ]
 provides-extras = ["fitsio"]
 
@@ -1986,7 +1986,7 @@ test = [
 
 [[package]]
 name = "sdsstools"
-version = "1.9.1"
+version = "1.9.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "daemonocle" },
@@ -2000,9 +2000,9 @@ dependencies = [
     { name = "rich" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f8/ec/de86a9cce5b5480e9630d0e537fea4fab91c77a188b1e3ac780fc2334d0d/sdsstools-1.9.1.tar.gz", hash = "sha256:509f41ce02b96ab0e97262ef4b4b79ce400e749900d9bf36d50e909d963df963", size = 49298, upload-time = "2024-12-25T16:51:12.973Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/47/2d/66a3caae392f5fb9fbc89f5e8970c5c6f00f9ad6ef385c297f222f9a567b/sdsstools-1.9.2.tar.gz", hash = "sha256:308b39204d8c7f3828bc5f71c20c95096f0ca29200fde68049551a5d89e2580d", size = 49314, upload-time = "2025-08-30T06:16:24.715Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/dc/1c/0afb9da73688f89702743edf5a0a5a9f3c7b51b6ae43cb66d7d43d2de4ee/sdsstools-1.9.1-py3-none-any.whl", hash = "sha256:ce2b1f4787859467dee5ed4af9362cd803f60d2b88bee88512b5847032ea4283", size = 55946, upload-time = "2024-12-25T16:51:10.063Z" },
+    { url = "https://files.pythonhosted.org/packages/1b/8b/7af4e5c39af6c07a6d40804fd36ebe52495260a36a81822cc79a4a5a795a/sdsstools-1.9.2-py3-none-any.whl", hash = "sha256:5c664a01deeec735f937b1302f79cf7bf6d9f543bc61bca18499cb944eb947c3", size = 55972, upload-time = "2025-08-30T06:16:23.038Z" },
 ]
 
 [[package]]

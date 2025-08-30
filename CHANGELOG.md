@@ -2,6 +2,10 @@
 
 ## Next release
 
+### ✨ Improved
+
+* Update `sdsstools` to `1.9.2`.
+
 ### 🔧 Fixed
 
 * [#27](https://github.com/sdss/lvmscp/pull/27) Avoid setting location for `Time.now()`.
