@@ -67,14 +67,14 @@ class LVMExposeDelegate(ExposureDelegate["SCPActor"]):
             height=2282.0,
         )
 
-    def reset(self):
+    async def reset(self):
         self.header_data = {}
         self.pressure_data = {}
         self.depth_data = {}
 
         self.use_shutter = True
 
-        return super().reset()
+        return await super().reset()
 
     async def check_expose(self) -> bool:
         """Performs a series of checks to confirm we can expose."""

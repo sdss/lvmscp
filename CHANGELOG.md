@@ -5,6 +5,7 @@
 ### 🔧 Fixed
 
 * [#27](https://github.com/sdss/lvmscp/pull/27) Avoid setting location for `Time.now()`.
+* Make `ExposureDelegate` reset method asynchronous.
 
 
 ## 0.10.6 - August 29, 2025
