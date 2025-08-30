@@ -1,5 +1,12 @@
 # Changelog
 
+## Next release
+
+### ✨ Improved
+
+* Updated `archon` to `0.15.5`. This version solves the pixel shift issues when fetching the buffer.
+
+
 ## 0.10.5 - August 10, 2025
 
 ### ✨ Improved
