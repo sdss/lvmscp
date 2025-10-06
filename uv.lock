@@ -2036,7 +2036,7 @@ wheels = [
 
 [[package]]
 name = "sdss-lvmscp"
-version = "0.10.8"
+version = "0.10.9a1"
 source = { editable = "." }
 dependencies = [
     { name = "sdss-archon" },
