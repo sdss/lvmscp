@@ -1,5 +1,12 @@
 # Changelog
 
+## Next release
+
+### ✨ Improved
+
+* Added `REOBS` and `ANCILLAR` header keywords.
+
+
 ## 0.10.7 - August 29, 2025
 
 ### ✨ Improved

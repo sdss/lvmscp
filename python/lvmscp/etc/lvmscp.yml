@@ -131,6 +131,8 @@ header:
   BIASSEC4: ['[2061:2077, 1:2040]', 'Overscan section for quadrant 4']
   TILE_ID: [null, 'The tile_id of this observation']
   DPOS: [0, 'Dither position']
+  REOBS: [False, 'Tile is being reobserved']
+  ANCILLAR: [False, 'Ancillary tile']
   BUFFER: [null, 'The buffer number read']
   SMJD: [null, 'SDSS Modified Julian Date (MJD+0.4)']
   HARTMANN: ['0 0', 'Left/right: 0=open 1=closed']
