@@ -1,6 +1,6 @@
 [project]
 name = "sdss-lvmscp"
-version = "0.10.8a1"
+version = "0.10.8"
 description = "LVM spectrograph control package."
 authors = [
     { name = "José Sánchez-Gallego", email = "gallegoj@uw.edu" },
